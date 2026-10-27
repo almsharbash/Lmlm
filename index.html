@@ -4,393 +4,1159 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1E9BF0">
-<meta name="description" content="منصة LMLM للتواصل والمراسلة">
+<meta name="description" content="LMLM — منصة تواصل ذكية">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LMLM — تواصل ومراسلة</title>
+<title>LMLM — تواصل بذكاء</title>
 <style>
+  /* ============================================================
+     LMLM v3 — Design System
+     Philosophy: "Calm Intelligence"
+     ============================================================ */
+
   :root {
-    --sky: #1E9BF0; --deep: #0E3A8C;
-    --mist: #EEF5FC; --card: #FFFFFF; --line: #D9E6F4;
-    --text: #0E2A5C; --muted: #6A7FA3; --mine-text: #FFFFFF;
-    --danger: #B3261E; --ok: #34C759;
+    --sky: #1E9BF0;
+    --deep: #0E3A8C;
+    --accent: #7C5CFF;
+    --mist: #F0F6FC;
+    --mist-2: #E3EFFA;
+    --card: #FFFFFF;
+    --card-2: #F8FBFF;
+    --line: #D9E6F4;
+    --text: #0E2A5C;
+    --text-2: #1A3A6E;
+    --muted: #6A7FA3;
+    --muted-2: #8FA6C9;
+    --mine-text: #FFFFFF;
+    --danger: #E84343;
+    --warn: #F59E0B;
+    --ok: #10B981;
+    --info: #3B82F6;
+    --shadow-sm: 0 1px 3px rgba(14, 42, 92, 0.06);
+    --shadow-md: 0 4px 12px rgba(14, 42, 92, 0.08);
+    --shadow-lg: 0 12px 32px rgba(14, 42, 92, 0.12);
+    --shadow-xl: 0 24px 64px rgba(14, 42, 92, 0.18);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+    --radius-xl: 28px;
+    --font-size-base: 15px;
   }
+
   :root[data-theme="dark"] {
-    --mist: #0B1B33; --card: #12274B; --line: #1F3B6C;
-    --text: #E8F1FF; --muted: #8FA6C9;
+    --mist: #0A1628;
+    --mist-2: #0F1E36;
+    --card: #122744;
+    --card-2: #17304F;
+    --line: #1F3B6C;
+    --text: #E8F1FF;
+    --text-2: #C7DCFF;
+    --muted: #8FA6C9;
+    --muted-2: #6A7FA3;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.6);
   }
+
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --mist: #0B1B33; --card: #12274B; --line: #1F3B6C;
-      --text: #E8F1FF; --muted: #8FA6C9;
+      --mist: #0A1628;
+      --mist-2: #0F1E36;
+      --card: #122744;
+      --card-2: #17304F;
+      --line: #1F3B6C;
+      --text: #E8F1FF;
+      --text-2: #C7DCFF;
+      --muted: #8FA6C9;
+      --muted-2: #6A7FA3;
     }
   }
-  * { box-sizing: border-box; }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
   html, body { height: 100%; margin: 0; overflow: hidden; }
+
   body {
     font-family: "Noto Sans Arabic", "Droid Sans Arabic", Tahoma, "Segoe UI", Arial, system-ui, sans-serif;
-    font-size: 15px; line-height: 1.5; color: var(--text);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: var(--text);
     background: var(--bg-paint, var(--mist));
+    transition: background 0.3s ease, color 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   button, input, select, textarea { font: inherit; color: inherit; }
-  button { cursor: pointer; }
+  button { cursor: pointer; -webkit-user-select: none; user-select: none; }
   :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
 
+  /* ============================================================
+     Layout
+     ============================================================ */
   .app {
-    height: 100vh; height: 100dvh; width: 100%; max-width: 1000px; margin: 0 auto;
+    height: 100vh; height: 100dvh; width: 100%; max-width: 1100px; margin: 0 auto;
     display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
     overflow: hidden; background: var(--card);
+    box-shadow: var(--shadow-xl);
   }
   .app.in-chat .list { display: none; }
   .chat { min-width: 0; }
-  @media (min-width: 760px) {
-    .app { grid-template-columns: 330px minmax(0, 1fr); border-inline: 1px solid var(--line); }
+
+  @media (min-width: 820px) {
+    .app { grid-template-columns: 360px minmax(0, 1fr); border-inline: 1px solid var(--line); }
     .app.in-chat .list { display: flex; }
   }
 
+  /* ============================================================
+     Top Bar
+     ============================================================ */
   .bar {
-    background: var(--bar-paint, var(--card)); color: var(--bar-text, var(--text));
-    display: flex; align-items: center; gap: 10px;
-    padding: calc(6px + env(safe-area-inset-top, 0px)) 8px 6px;
-    border-bottom: 1px solid var(--line); min-height: 52px;
+    background: var(--bar-paint, var(--card));
+    color: var(--bar-text, var(--text));
+    display: flex; align-items: center; gap: 8px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+    border-bottom: 1px solid var(--line);
+    min-height: 56px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative; z-index: 2;
   }
-  .icon-btn {
-    width: 36px; height: 36px; border: 0; border-radius: 50%;
-    background: transparent; color: inherit; font-size: 18px;
-    display: grid; place-items: center; flex: none;
-  }
-  .icon-btn:hover { background: rgba(127,127,127,.15); }
-  .brand { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-  .brand img { width: 28px; height: 28px; object-fit: contain; }
-  .brand h1 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: 1px; direction: ltr; }
 
-  .list { display: flex; flex-direction: column; min-height: 0; border-inline-end: 1px solid var(--line); }
-  .search { margin: 6px 10px; }
+  .icon-btn {
+    width: 40px; height: 40px; border: 0; border-radius: 50%;
+    background: transparent; color: inherit; font-size: 20px;
+    display: grid; place-items: center; flex: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  .icon-btn:hover { background: rgba(127,127,127,.12); transform: scale(1.05); }
+  .icon-btn:active { transform: scale(0.92); }
+  .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+  .brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .brand-logo {
+    width: 36px; height: 36px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--sky), var(--deep));
+    display: grid; place-items: center; color: #fff;
+    font-weight: 700; font-size: 16px;
+    box-shadow: 0 4px 12px rgba(30, 155, 240, 0.35);
+    letter-spacing: -0.5px;
+  }
+  .brand h1 {
+    margin: 0; font-size: 18px; font-weight: 700;
+    letter-spacing: 0.5px; direction: ltr;
+    background: linear-gradient(135deg, var(--sky), var(--deep));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ============================================================
+     Search
+     ============================================================ */
+  .search { padding: 10px 12px; background: var(--card); }
+  .search-wrap { position: relative; }
+  .search-wrap::before {
+    content: "🔍";
+    position: absolute; inset-inline-start: 14px; top: 50%;
+    transform: translateY(-50%); font-size: 14px;
+    opacity: 0.5; pointer-events: none;
+  }
   .search input {
-    width: 100%; padding: 6px 12px; font-size: 14px;
-    border-radius: 999px; border: 0; background: var(--mist); outline: none;
+    width: 100%; padding: 10px 14px 10px 40px;
+    font-size: 14px; border-radius: 14px; border: 0;
+    background: var(--mist); outline: none;
+    transition: all 0.2s ease;
   }
-  .chats { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+  .search input:focus {
+    background: var(--card);
+    box-shadow: 0 0 0 2px var(--sky), var(--shadow-md);
+  }
+
+  /* ============================================================
+     Chat List
+     ============================================================ */
+  .list {
+    display: flex; flex-direction: column; min-height: 0;
+    border-inline-end: 1px solid var(--line);
+    background: var(--card);
+  }
+  .chats { list-style: none; margin: 0; padding: 4px 6px 20px; overflow-y: auto; flex: 1; }
+  .chats::-webkit-scrollbar { width: 6px; }
+  .chats::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
   .item {
-    display: flex; align-items: center; gap: 10px; padding: 7px 10px;
-    width: 100%; border: 0; background: transparent; text-align: start; position: relative;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; width: 100%; border: 0;
+    background: transparent; text-align: start; position: relative;
+    border-radius: 16px; margin-bottom: 2px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .item:hover, .item[aria-current="true"], .item.current { background: var(--mist); }
-  .item.pinned .meta b::after { content: " 📌"; font-size: 12px; }
+  .item:hover { background: var(--mist); }
+  .item.current { background: var(--mist-2); }
+  .item.current::before {
+    content: ""; position: absolute; inset-inline-start: 4px;
+    top: 25%; bottom: 25%; width: 3px;
+    background: linear-gradient(180deg, var(--sky), var(--deep));
+    border-radius: 3px;
+  }
+  .item.pinned .meta b::after { content: " 📌"; font-size: 11px; }
+
   .avatar {
-    width: 42px; height: 42px; font-size: 16px; border-radius: 50%;
-    display: grid; place-items: center; flex: none; color: #fff; font-weight: 600;
-    background: var(--av, linear-gradient(135deg,#3CC4FF,#0E3A8C));
-    position: relative; overflow: hidden; background-size: cover; background-position: center;
+    width: 48px; height: 48px; font-size: 18px; border-radius: 50%;
+    display: grid; place-items: center; flex: none;
+    color: #fff; font-weight: 600;
+    background: var(--av, linear-gradient(135deg, #3CC4FF, #0E3A8C));
+    position: relative; overflow: hidden;
+    background-size: cover; background-position: center;
+    box-shadow: 0 2px 8px rgba(30, 155, 240, 0.25);
   }
-  .online::after {
+  .avatar.online::after {
     content: ""; position: absolute; bottom: 1px; inset-inline-end: 1px;
-    width: 11px; height: 11px; border-radius: 50%;
-    background: var(--ok); border: 2px solid var(--card);
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--ok); border: 2.5px solid var(--card);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+    animation: pulse-online 2s infinite;
   }
-  .meta { min-width: 0; flex: 1; }
-  .meta b { display: block; font-weight: 600; font-size: 14px; }
+  @keyframes pulse-online {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15); }
+    50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.05); }
+  }
+
+  .meta { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .meta b {
+    display: block; font-weight: 600; font-size: 15px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text);
+  }
   .meta span {
     display: block; color: var(--muted); font-size: 13px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 11px; color: var(--muted); }
+  .meta span.typing { color: var(--sky); font-style: italic; }
 
-  .chat { display: none; flex-direction: column; min-height: 0; height: 100%; }
+  .side {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+    font-size: 11px; color: var(--muted); flex: none;
+  }
+  .badge {
+    background: linear-gradient(135deg, var(--sky), var(--deep));
+    color: #fff; border-radius: 999px; min-width: 20px; height: 20px;
+    padding: 0 7px; display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    box-shadow: 0 2px 6px rgba(30, 155, 240, 0.4);
+    animation: badge-pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  @keyframes badge-pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+
+  /* ============================================================
+     Empty States
+     ============================================================ */
+  .empty {
+    margin: auto; text-align: center; color: var(--muted); padding: 32px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: fade-in 0.6s ease;
+  }
+  .empty-logo {
+    width: 100px; height: 100px; border-radius: 28px;
+    background: linear-gradient(135deg, var(--sky), var(--deep));
+    display: grid; place-items: center; color: #fff;
+    font-size: 36px; font-weight: 700; letter-spacing: -1px;
+    margin-bottom: 12px;
+    box-shadow: 0 20px 48px rgba(30, 155, 240, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .empty strong {
+    display: block; color: var(--text); font-size: 24px; font-weight: 700;
+    direction: ltr; letter-spacing: 1px; margin-bottom: 4px;
+  }
+  .empty p { margin: 0; max-width: 260px; }
+
+  /* ============================================================
+     Chat View
+     ============================================================ */
+  .chat {
+    display: none; flex-direction: column; min-height: 0; height: 100%;
+    background: var(--card);
+  }
   .chat.open { display: flex; }
-  @media (min-width: 760px) { .chat { display: flex; } }
-  .empty { margin: auto; text-align: center; color: var(--muted); padding: 24px; }
-  .empty img { width: 96px; height: 96px; object-fit: contain; margin-bottom: 10px; }
-  .empty strong { display: block; color: var(--text); font-size: 22px; font-weight: 600; direction: ltr; }
+  @media (min-width: 820px) { .chat { display: flex; } }
+
   .back { display: none; }
   .chat.open .back { display: grid; }
-  @media (min-width: 760px) { .back { display: none !important; } }
+  @media (min-width: 820px) { .back { display: none !important; } }
+
   .head-meta { flex: 1; min-width: 0; }
-  .head-meta b { display: block; font-size: 15px; }
-  .head-meta span { display: block; font-size: 12px; color: var(--muted); }
-  .bar .head-meta span { color: inherit; opacity: .75; }
+  .head-meta b {
+    display: block; font-size: 15px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .head-meta span {
+    display: block; font-size: 12px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .head-meta span.online-status { color: var(--ok); font-weight: 500; }
+  .bar .head-meta span { color: inherit; opacity: 0.8; }
 
   .msgs {
-    flex: 1; overflow-y: auto; padding: 10px 10px 4px;
-    display: flex; flex-direction: column; gap: 4px;
+    flex: 1; overflow-y: auto; padding: 16px 12px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(30, 155, 240, 0.04), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(124, 92, 255, 0.04), transparent 40%);
+    background-attachment: fixed;
+    scroll-behavior: smooth;
   }
-  .row { display: flex; }
+  .msgs::-webkit-scrollbar { width: 6px; }
+  .msgs::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+  .day {
+    align-self: center; background: var(--card-2); color: var(--muted);
+    font-size: 12px; font-weight: 500; padding: 4px 14px;
+    border-radius: 999px; margin: 8px 0;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .row { display: flex; animation: msg-in 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  @keyframes msg-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
   .row.me { justify-content: flex-start; }
   .row.them { justify-content: flex-end; }
+
   .bubble {
-    max-width: 82%; padding: 6px 10px 4px; font-size: 14px; border-radius: 16px;
-    background: var(--card); border: 1px solid var(--line);
-    word-wrap: break-word; white-space: pre-wrap; cursor: pointer; position: relative;
+    max-width: 82%; padding: 9px 13px 6px;
+    font-size: 14px; border-radius: 18px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    word-wrap: break-word; white-space: pre-wrap;
+    cursor: pointer; position: relative;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
   }
+  .bubble:hover { box-shadow: var(--shadow-md); }
   .me .bubble {
-    background: var(--btn-paint, var(--sky)); color: var(--btn-text, var(--mine-text));
-    border-color: transparent; border-end-start-radius: 4px;
+    background: linear-gradient(135deg, var(--btn-paint, var(--sky)), var(--deep));
+    color: var(--btn-text, var(--mine-text));
+    border-color: transparent;
+    border-end-start-radius: 6px;
+    box-shadow: 0 4px 12px rgba(30, 155, 240, 0.25);
   }
-  .them .bubble { border-end-end-radius: 4px; }
-  .bubble.sel { outline: 2px solid var(--sky); outline-offset: 1px; }
+  .them .bubble { border-end-end-radius: 6px; }
+  .bubble.sel { outline: 2px solid var(--sky); outline-offset: 2px; }
+
   .quote {
-    border-inline-start: 3px solid currentColor; padding: 2px 8px; margin-bottom: 4px;
-    border-radius: 6px; background: rgba(127,127,127,.12); font-size: 13px; opacity: .9;
+    border-inline-start: 3px solid currentColor;
+    padding: 4px 8px; margin-bottom: 6px;
+    border-radius: 8px;
+    background: rgba(127, 127, 127, 0.15);
+    font-size: 13px; opacity: 0.9;
+    display: flex; flex-direction: column; gap: 2px;
   }
+  .quote b { font-size: 12px; opacity: 0.8; }
+
+  .from {
+    font-size: 12px; font-weight: 700;
+    color: var(--sky); margin-bottom: 3px;
+  }
+  .me .from { color: rgba(255, 255, 255, 0.9); }
+
   .info {
-    display: flex; gap: 6px; justify-content: flex-end; align-items: center;
-    font-size: 11px; opacity: .7; margin-top: 2px; direction: ltr;
+    display: flex; gap: 6px; justify-content: flex-end;
+    align-items: center; font-size: 11px;
+    opacity: 0.7; margin-top: 3px; direction: ltr;
   }
-  .img { max-width: 240px; width: 100%; border-radius: 10px; display: block; margin-bottom: 4px; }
-  .actions { display: none; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .tick { font-size: 12px; }
+  .tick.read { color: #7FE3FF; }
+
+  .img {
+    max-width: 280px; width: 100%; border-radius: 12px;
+    display: block; margin-bottom: 4px; cursor: zoom-in;
+    transition: transform 0.2s;
+  }
+  .img:hover { transform: scale(1.02); }
+
+  .video-wrap {
+    max-width: 280px; width: 100%; border-radius: 12px;
+    overflow: hidden; margin-bottom: 4px;
+    background: #000;
+  }
+  .video-wrap video { width: 100%; display: block; }
+
+  audio { max-width: 240px; width: 100%; display: block; margin-bottom: 4px; }
+
+  .actions {
+    display: none; gap: 6px; margin-top: 8px; flex-wrap: wrap;
+    animation: fade-in 0.2s ease;
+  }
   .bubble.sel .actions { display: flex; }
   .actions button {
-    border: 0; border-radius: 999px; padding: 4px 10px; font-size: 13px;
-    background: rgba(127,127,127,.18); color: inherit;
+    border: 0; border-radius: 999px;
+    padding: 5px 12px; font-size: 13px; font-weight: 500;
+    background: rgba(127, 127, 127, 0.2);
+    color: inherit; transition: all 0.15s;
   }
-  .typing { color: var(--muted); font-size: 14px; padding: 0 16px 4px; min-height: 24px; }
+  .actions button:hover { background: rgba(127, 127, 127, 0.35); transform: translateY(-1px); }
 
+  .typing-indicator {
+    display: inline-flex; gap: 3px; padding: 4px 0;
+  }
+  .typing-indicator span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; opacity: 0.4;
+    animation: typing-bounce 1.2s infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ============================================================
+     Reply Bar
+     ============================================================ */
   .reply-bar {
-    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-    border-top: 1px solid var(--line); background: var(--card); font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-top: 1px solid var(--line);
+    background: var(--card-2); font-size: 14px;
+    animation: slide-up 0.25s ease;
   }
-  .reply-bar div { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  .reply-bar div {
+    flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--muted);
+    border-inline-start: 3px solid var(--sky);
+    padding-inline-start: 10px;
+  }
+  .reply-bar b { color: var(--sky); display: block; font-size: 13px; }
+
+  /* ============================================================
+     Emoji Row
+     ============================================================ */
   .emoji-row {
-    display: flex; gap: 6px; padding: 6px 12px; overflow-x: auto;
-    border-top: 1px solid var(--line); background: var(--card);
+    display: flex; gap: 8px; padding: 8px 12px;
+    overflow-x: auto; border-top: 1px solid var(--line);
+    background: var(--card-2);
+    animation: slide-up 0.2s ease;
   }
-  .emoji-row button { border: 0; background: transparent; font-size: 22px; padding: 2px; }
+  .emoji-row::-webkit-scrollbar { display: none; }
+  .emoji-row button {
+    border: 0; background: transparent; font-size: 24px;
+    padding: 4px; transition: transform 0.15s;
+    flex: none;
+  }
+  .emoji-row button:hover { transform: scale(1.3); }
+
+  /* ============================================================
+     Composer
+     ============================================================ */
   .composer {
-    display: flex; align-items: center; gap: 4px;
-    padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid var(--line); background: var(--card);
+    display: flex; align-items: flex-end; gap: 6px;
+    padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: var(--card);
   }
   .composer input[type="text"] {
-    flex: 1; min-width: 0; padding: 8px 12px; font-size: 14px;
-    border-radius: 999px; border: 0; background: var(--mist); outline: none;
+    flex: 1; min-width: 0;
+    padding: 11px 16px; font-size: 15px;
+    border-radius: 22px; border: 1px solid var(--line);
+    background: var(--mist); outline: none;
+    transition: all 0.2s;
   }
+  .composer input[type="text"]:focus {
+    background: var(--card);
+    border-color: var(--sky);
+    box-shadow: 0 0 0 3px rgba(30, 155, 240, 0.12);
+  }
+
   .send {
-    width: 38px; height: 38px; border: 0; border-radius: 50%; flex: none;
-    background: var(--btn-paint, var(--sky)); color: var(--btn-text, #fff);
-    font-size: 18px; display: grid; place-items: center;
+    width: 44px; height: 44px; border: 0; border-radius: 50%;
+    flex: none; background: linear-gradient(135deg, var(--sky), var(--deep));
+    color: #fff; font-size: 18px;
+    display: grid; place-items: center;
+    box-shadow: 0 4px 12px rgba(30, 155, 240, 0.35);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .pick-wrap { position: relative; overflow: hidden; display: inline-grid; place-items: center; }
+  .send:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(30, 155, 240, 0.5); }
+  .send:active { transform: scale(0.92); }
+  .send.ready { animation: pulse-send 1.8s infinite; }
+  @keyframes pulse-send {
+    0%, 100% { box-shadow: 0 4px 12px rgba(30, 155, 240, 0.35); }
+    50% { box-shadow: 0 4px 20px rgba(30, 155, 240, 0.65); }
+  }
+
+  .icon-btn.rec {
+    color: var(--danger);
+    animation: rec-pulse 1.2s infinite;
+  }
+  @keyframes rec-pulse {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(232, 67, 67, 0.15); }
+  }
+
+  /* ============================================================
+     File Upload (image/video picker)
+     ============================================================ */
+  .pick-wrap {
+    position: relative; overflow: hidden;
+    display: inline-grid; place-items: center;
+  }
   .pick-input {
-    position: absolute; inset: 0; width: 100%; height: 100%;
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
     opacity: 0; cursor: pointer; font-size: 0;
   }
-  .from { font-size: 12px; font-weight: 600; color: var(--sky); margin-bottom: 2px; }
-  .me .from { color: inherit; }
-  .icon-btn.rec { color: var(--danger); }
-  audio { max-width: 230px; display: block; margin-bottom: 4px; }
 
+  /* ============================================================
+     Upload Progress
+     ============================================================ */
+  .upload-progress {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: var(--card); color: var(--text);
+    padding: 12px 20px; border-radius: 14px;
+    box-shadow: var(--shadow-xl);
+    z-index: 100; min-width: 200px;
+    display: flex; align-items: center; gap: 12px;
+    animation: slide-up 0.3s ease;
+  }
+  .upload-progress .spinner {
+    width: 20px; height: 20px;
+    border: 2.5px solid var(--line);
+    border-top-color: var(--sky);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============================================================
+     Overlays / Sheets
+     ============================================================ */
   .overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.4);
-    display: flex; align-items: flex-end; justify-content: center; z-index: 20;
+    position: fixed; inset: 0;
+    background: rgba(10, 22, 40, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 50;
+    animation: fade-in 0.25s ease;
   }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
   .overlay[hidden] { display: none; }
-  .sheet {
-    background: var(--card); color: var(--text); width: 100%; max-width: 520px;
-    max-height: 88vh; overflow-y: auto; border-radius: 18px 18px 0 0;
-    padding: 14px 18px calc(18px + env(safe-area-inset-bottom, 0px));
-  }
-  @media (min-width: 760px) {
-    .overlay { align-items: center; }
-    .sheet { border-radius: 18px; }
-  }
-  .sheet h2 { margin: 0 0 10px; font-size: 18px; }
-  .sheet h3 { font-size: 14px; color: var(--muted); font-weight: 500; margin: 16px 0 8px; }
-  .row2 { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; }
-  .row2 select, .row2 input[type="text"] {
-    padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--mist);
-  }
-  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
-  .swatch {
-    width: 38px; height: 38px; border-radius: 50%;
-    border: 2px solid var(--card); box-shadow: 0 0 0 1px var(--line);
-  }
-  .preview { height: 70px; border-radius: 14px; border: 1px solid var(--line); margin: 10px 0; }
-  .targets label { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-  .done {
-    width: 100%; margin-top: 12px; padding: 11px; border-radius: 12px;
-    border: 0; background: var(--sky); color: #fff; font-weight: 600;
-  }
-  .ghost { border: 1px solid var(--line); background: transparent; border-radius: 10px; padding: 6px 12px; }
-  .toast {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: var(--text); color: var(--card); padding: 8px 14px;
-    border-radius: 999px; font-size: 14px; opacity: 0;
-    transition: opacity .2s; pointer-events: none; z-index: 30; max-width: 90vw; text-align: center;
-  }
-  .toast.show { opacity: .95; }
 
+  .sheet {
+    background: var(--card); color: var(--text);
+    width: 100%; max-width: 540px; max-height: 90vh;
+    overflow-y: auto; border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.25);
+    animation: sheet-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes sheet-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .sheet::-webkit-scrollbar { width: 4px; }
+  .sheet::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+  @media (min-width: 820px) {
+    .overlay { align-items: center; }
+    .sheet { border-radius: var(--radius-xl); max-height: 85vh; }
+  }
+
+  .sheet h2 {
+    margin: 0 0 16px; font-size: 20px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sheet h3 {
+    font-size: 13px; color: var(--muted); font-weight: 600;
+    margin: 20px 0 10px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .sheet-handle {
+    width: 40px; height: 4px; border-radius: 2px;
+    background: var(--line); margin: -8px auto 16px;
+  }
+
+  /* ============================================================
+     Form Fields
+     ============================================================ */
+  .row2 {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 12px 0;
+  }
+
+  .row2 select, .row2 input[type="text"] {
+    padding: 8px 12px; border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--mist); font: inherit;
+    transition: all 0.2s;
+  }
+  .row2 select:focus, .row2 input[type="text"]:focus {
+    border-color: var(--sky); outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 155, 240, 0.1);
+  }
+
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; padding: 4px 0; }
+  .swatch {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 3px solid var(--card);
+    box-shadow: 0 0 0 1px var(--line), var(--shadow-sm);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch[aria-pressed="true"] {
+    box-shadow: 0 0 0 3px var(--sky), var(--shadow-md);
+    transform: scale(1.1);
+  }
+
+  .preview {
+    height: 80px; border-radius: 16px;
+    border: 2px solid var(--line); margin: 12px 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .targets { display: flex; flex-direction: column; gap: 4px; }
+  .targets label {
+    display: flex; align-items: center; gap: 10px;
+    margin: 4px 0; padding: 8px 10px;
+    border-radius: 10px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .targets label:hover { background: var(--mist); }
+
+  .targets input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--sky); cursor: pointer;
+  }
+
+  /* ============================================================
+     Buttons
+     ============================================================ */
+  .done {
+    width: 100%; padding: 13px;
+    border-radius: 14px; border: 0;
+    background: linear-gradient(135deg, var(--sky), var(--deep));
+    color: #fff; font-weight: 600; font-size: 15px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(30, 155, 240, 0.35);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .done:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(30, 155, 240, 0.5);
+  }
+  .done:active:not(:disabled) { transform: translateY(0); }
+  .done:disabled {
+    opacity: 0.6; cursor: not-allowed;
+    background: linear-gradient(135deg, var(--muted-2), var(--muted));
+    box-shadow: none;
+  }
+
+  .ghost {
+    border: 1px solid var(--line);
+    background: transparent;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .ghost:hover { background: var(--mist); border-color: var(--sky); }
+
+  /* Loading spinner inside buttons */
+  .spinner-btn {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ============================================================
+     Toast Notifications
+     ============================================================ */
+  .toast-container {
+    position: fixed; bottom: 90px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex; flex-direction: column; gap: 8px;
+    align-items: center;
+    pointer-events: none;
+    width: 90%; max-width: 400px;
+  }
+
+  .toast-item {
+    background: var(--card); color: var(--text);
+    padding: 12px 18px;
+    border-radius: 14px;
+    box-shadow: var(--shadow-xl);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 500;
+    min-width: 240px;
+    animation: toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border-inline-start: 4px solid var(--info);
+    pointer-events: auto;
+  }
+  .toast-item.success { border-inline-start-color: var(--ok); }
+  .toast-item.error { border-inline-start-color: var(--danger); }
+  .toast-item.info { border-inline-start-color: var(--info); }
+  .toast-item.warn { border-inline-start-color: var(--warn); }
+
+  .toast-item .toast-icon {
+    font-size: 20px; flex: none;
+  }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .toast-item.leaving {
+    animation: toast-out 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+  @keyframes toast-out {
+    to { opacity: 0; transform: translateY(-10px) scale(0.9); }
+  }
+
+  /* ============================================================
+     Auth Screen
+     ============================================================ */
   .auth {
-    position: fixed; inset: 0; z-index: 40; background: var(--mist);
-    display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto;
+    position: fixed; inset: 0; z-index: 60;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(30, 155, 240, 0.3), transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.25), transparent 50%),
+      linear-gradient(135deg, var(--mist), var(--mist-2));
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; overflow-y: auto;
   }
+
   .auth-card {
-    background: var(--card); width: 100%; max-width: 380px;
-    border-radius: 18px; padding: 18px; display: flex; flex-direction: column;
-    gap: 10px; border: 1px solid var(--line);
+    background: var(--card);
+    width: 100%; max-width: 400px;
+    border-radius: var(--radius-xl);
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--line);
+    animation: card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .auth-card h2 { margin: 0; text-align: center; font-size: 18px; }
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .auth-hero {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px; margin-bottom: 8px;
+  }
+  .auth-logo {
+    width: 72px; height: 72px; border-radius: 20px;
+    background: linear-gradient(135deg, var(--sky), var(--deep));
+    display: grid; place-items: center; color: #fff;
+    font-size: 28px; font-weight: 800; letter-spacing: -1px;
+    box-shadow: 0 12px 32px rgba(30, 155, 240, 0.4);
+  }
+  .auth-card h2 {
+    margin: 0; text-align: center; font-size: 22px; font-weight: 700;
+  }
+  .auth-card .subtitle {
+    text-align: center; color: var(--muted);
+    font-size: 14px; margin: -6px 0 8px;
+  }
+
   .auth-card input {
-    padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    padding: 13px 16px; border-radius: 14px;
+    border: 1.5px solid var(--line);
     background: var(--mist); font-size: 15px;
+    transition: all 0.2s;
   }
+  .auth-card input:focus {
+    outline: none;
+    border-color: var(--sky);
+    background: var(--card);
+    box-shadow: 0 0 0 4px rgba(30, 155, 240, 0.12);
+  }
+  .auth-card input.error {
+    border-color: var(--danger);
+    animation: shake 0.4s;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  .password-wrap {
+    position: relative;
+  }
+  .password-wrap input { width: 100%; padding-inline-end: 48px; }
+  .password-toggle {
+    position: absolute;
+    inset-inline-end: 8px; top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border: 0; border-radius: 50%;
+    background: transparent;
+    display: grid; place-items: center;
+    font-size: 18px; cursor: pointer;
+    opacity: 0.6; transition: opacity 0.2s;
+  }
+  .password-toggle:hover { opacity: 1; }
+
+  .password-strength {
+    height: 4px; border-radius: 2px;
+    background: var(--line);
+    overflow: hidden; margin-top: -6px;
+  }
+  .password-strength-bar {
+    height: 100%; width: 0%;
+    transition: all 0.3s;
+    border-radius: 2px;
+  }
+  .password-strength-bar.weak { width: 33%; background: var(--danger); }
+  .password-strength-bar.medium { width: 66%; background: var(--warn); }
+  .password-strength-bar.strong { width: 100%; background: var(--ok); }
+
   .auth-card code {
-    direction: ltr; display: block; background: var(--mist);
-    padding: 10px; border-radius: 10px; font-size: 18px;
-    text-align: center; word-break: break-all;
+    direction: ltr; display: block;
+    background: var(--mist);
+    padding: 14px; border-radius: 12px;
+    font-size: 18px; text-align: center;
+    word-break: break-all; font-weight: 600;
+    color: var(--sky);
+    border: 1.5px dashed var(--line);
   }
-  .hint { color: var(--muted); font-size: 13px; margin: 0; }
-  .link { border: 0; background: transparent; color: var(--sky); }
-  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
-  .done[disabled] { opacity: .5; cursor: not-allowed; }
-  .field { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-size: 14px; }
+
+  .hint {
+    color: var(--muted); font-size: 13px;
+    margin: 0; line-height: 1.5;
+  }
+  .hint.error-msg { color: var(--danger); font-weight: 600; }
+
+  .link {
+    border: 0; background: transparent;
+    color: var(--sky); font-weight: 500;
+    padding: 6px; transition: opacity 0.2s;
+  }
+  .link:hover { opacity: 0.8; }
+
+  .check {
+    display: flex; gap: 10px; align-items: center; font-size: 14px;
+    cursor: pointer; padding: 6px 0;
+  }
+  .check input[type="checkbox"] {
+    width: 20px; height: 20px;
+    accent-color: var(--sky); cursor: pointer;
+  }
+
+  .field {
+    display: flex; flex-direction: column; gap: 6px;
+    margin: 10px 0; font-size: 14px; font-weight: 500;
+  }
   .field input, .field textarea {
-    padding: 8px 10px; border-radius: 10px;
-    border: 1px solid var(--line); background: var(--mist); font: inherit;
+    padding: 11px 14px; border-radius: 12px;
+    border: 1.5px solid var(--line);
+    background: var(--mist); font: inherit;
+    font-weight: 400; transition: all 0.2s;
+    resize: vertical;
   }
-  .pic { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--sky);
+    background: var(--card);
+    box-shadow: 0 0 0 3px rgba(30, 155, 240, 0.1);
+  }
+
+  .pic { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
   .pic-img {
-    width: 72px; height: 72px; border-radius: 50%;
-    background: linear-gradient(135deg,#3CC4FF,#0E3A8C) center/cover no-repeat;
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg, #3CC4FF, #0E3A8C) center/cover no-repeat;
     color: #fff; display: grid; place-items: center;
-    font-size: 26px; font-weight: 600; flex: none;
+    font-size: 32px; font-weight: 600; flex: none;
+    box-shadow: var(--shadow-md);
+    border: 3px solid var(--card);
   }
+
   .ghost-btn {
-    display: inline-block; border: 1px solid var(--line);
-    background: transparent; border-radius: 10px; padding: 6px 12px; cursor: pointer;
+    display: inline-block;
+    border: 1px solid var(--line);
+    background: transparent;
+    border-radius: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
   }
+  .ghost-btn:hover { background: var(--mist); border-color: var(--sky); }
+
   #bootErr {
-    position: fixed; inset: auto 10px 10px; background: var(--danger); color: #fff;
-    padding: 10px 14px; border-radius: 12px; z-index: 99; font-size: 14px;
+    position: fixed; inset: auto 10px 10px;
+    background: var(--danger); color: #fff;
+    padding: 12px 16px; border-radius: 14px;
+    z-index: 99; font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    animation: slide-up 0.3s ease;
+  }
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ============================================================
+     Lightbox
+     ============================================================ */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fade-in 0.2s ease;
+    cursor: zoom-out;
+  }
+  .lightbox img {
+    max-width: 100%; max-height: 100%;
+    border-radius: 12px;
+    animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes zoom-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .lightbox-close {
+    position: absolute; top: 20px; inset-inline-end: 20px;
+    width: 44px; height: 44px;
+    border-radius: 50%; border: 0;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff; font-size: 24px;
+    display: grid; place-items: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+  }
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.25); }
+
+  /* ============================================================
+     Scrollbar & Selection
+     ============================================================ */
+  ::selection { background: var(--sky); color: #fff; }
+
+  /* ============================================================
+     Responsive
+     ============================================================ */
+  @media (max-width: 400px) {
+    .brand h1 { font-size: 16px; }
+    .bubble { max-width: 88%; }
   }
 </style>
-</head>
-<body>
+  </head><body>
 
+<!-- ============================================================
+     AUTH SCREEN
+     ============================================================ -->
 <div class="auth" id="auth" hidden>
+  <!-- Login -->
   <form class="auth-card" id="loginForm" hidden>
-    <h2>تسجيل الدخول</h2>
-    <input id="lId" placeholder="اسم المستخدم أو البريد الإلكتروني" autocomplete="username">
-    <input id="lPass" type="password" placeholder="كلمة المرور" autocomplete="current-password">
-    <p id="lErr" class="hint" style="color:var(--danger);font-weight:600" hidden></p>
-    <button class="done" type="submit">دخول</button>
+    <div class="auth-hero">
+      <div class="auth-logo">L</div>
+      <h2>مرحباً بعودتك</h2>
+      <p class="subtitle">سجّل دخولك للمتابعة</p>
+    </div>
+    <input id="lId" placeholder="اسم المستخدم أو البريد" autocomplete="username">
+    <div class="password-wrap">
+      <input id="lPass" type="password" placeholder="كلمة المرور" autocomplete="current-password">
+      <button type="button" class="password-toggle" data-toggle="lPass" aria-label="إظهار كلمة المرور">👁️</button>
+    </div>
+    <p id="lErr" class="hint error-msg" hidden></p>
+    <button class="done" type="submit"><span>دخول</span></button>
     <button type="button" class="link" data-go="chooseForm">إنشاء حساب جديد</button>
     <button type="button" class="ghost-btn" data-install>📲 تثبيت التطبيق على الجاهز</button>
   </form>
 
+  <!-- Choose method -->
   <div class="auth-card" id="chooseForm" hidden>
-    <h2>إنشاء حساب</h2>
-    <button type="button" class="done" data-go="rimForm">بدون بريد (كلمة مرور تلقائية)</button>
-    <button type="button" class="done" data-go="regForm">بالبريد الإلكتروني (رمز تحقق)</button>
+    <div class="auth-hero">
+      <div class="auth-logo">L</div>
+      <h2>إنشاء حساب</h2>
+      <p class="subtitle">اختر الطريقة المناسبة لك</p>
+    </div>
+    <button type="button" class="done" data-go="rimForm">🚀 بدون بريد (كلمة مرور تلقائية)</button>
+    <button type="button" class="done" data-go="regForm">✉️ بالبريد الإلكتروني (رمز تحقق)</button>
     <button type="button" class="link" data-go="loginForm">لدي حساب بالفعل</button>
   </div>
 
+  <!-- RIM signup -->
   <form class="auth-card" id="rimForm" hidden>
-    <h2>حساب بدون بريد</h2>
-    <p class="hint">ستُولَّد لك كلمة مرور تبدء بـ rim وتظهر مرة واحدة فقط.</p>
+    <div class="auth-hero">
+      <div class="auth-logo">L</div>
+      <h2>حساب فوري</h2>
+      <p class="subtitle">كلمة مرور عشوائية تُولَّد لك مرة واحدة</p>
+    </div>
+    <p class="hint">ستُولَّد لك كلمة مرور تبدء بـ rim وتظهر مرة واحدة فقط. احفظها في مكان آمن.</p>
     <input id="rimUser" placeholder="اسم المستخدم (إنجليزية أو أرقام)" maxlength="20" autocomplete="username">
-    <p id="rimErr" class="hint" style="color:var(--danger);font-weight:600" hidden></p>
-    <button class="done" type="submit">إنشاء الحساب</button>
+    <p id="rimErr" class="hint error-msg" hidden></p>
+    <button class="done" type="submit"><span>إنشاء الحساب</span></button>
     <button type="button" class="link" data-go="chooseForm">رجوع</button>
   </form>
 
+  <!-- Email signup -->
   <form class="auth-card" id="regForm" hidden>
-    <h2>حساب بالبريد الإلكتروني</h2>
+    <div class="auth-hero">
+      <div class="auth-logo">L</div>
+      <h2>إنشاء حساب</h2>
+      <p class="subtitle">بالبريد الإلكتروني</p>
+    </div>
     <input id="rUser" placeholder="اسم المستخدم (إنجليزية أو أرقام)" maxlength="20" autocomplete="username">
     <input id="rEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-    <input id="rPass" type="password" placeholder="كلمة المرور (8 أحرف على الأقل)" autocomplete="new-password">
-    <p id="rErr" class="hint" style="color:var(--danger);font-weight:600" hidden></p>
-    <button class="done" type="submit">إرسال رمز التحقق</button>
+    <div class="password-wrap">
+      <input id="rPass" type="password" placeholder="كلمة المرور (8+ أحرف)" autocomplete="new-password">
+      <button type="button" class="password-toggle" data-toggle="rPass" aria-label="إظهار كلمة المرور">👁️</button>
+    </div>
+    <div class="password-strength"><div class="password-strength-bar" id="rPassStrength"></div></div>
+    <p id="rErr" class="hint error-msg" hidden></p>
+    <button class="done" type="submit"><span>إرسال رمز التحقق</span></button>
     <button type="button" class="link" data-go="chooseForm">رجوع</button>
   </form>
 
+  <!-- Verify -->
   <div class="auth-card" id="verifyBox" hidden>
-    <h2>أدخل رمز التحقق</h2>
-    <p class="hint">أرسلنا رمز التحقق إلى <span id="vTo"></span></p>
-    <input id="vCode" inputmode="numeric" maxlength="8" placeholder="أدخل الرمز" autocomplete="one-time-code">
-    <p id="vErr" class="hint" style="color:var(--danger);font-weight:600" hidden></p>
-    <button class="done" id="verifyBtn">تأكيد</button>
-    <button type="button" class="ghost-btn" id="resendBtn">إعادة الإرسال</button>
+    <div class="auth-hero">
+      <div class="auth-logo">✉️</div>
+      <h2>أدخل رمز التحقق</h2>
+      <p class="subtitle">أرسلناه إلى <span id="vTo" style="color:var(--sky);font-weight:600"></span></p>
+    </div>
+    <input id="vCode" inputmode="numeric" maxlength="8" placeholder="أدخل الرمز" autocomplete="one-time-code" style="text-align:center;font-size:20px;letter-spacing:8px;font-weight:600">
+    <p id="vErr" class="hint error-msg" hidden></p>
+    <button class="done" id="verifyBtn"><span>تأكيد</span></button>
+    <button type="button" class="ghost-btn" id="resendBtn" style="width:100%">إعادة الإرسال (<span id="resendCountdown">0</span>)</button>
   </div>
 
+  <!-- Generated password -->
   <div class="auth-card" id="genBox" hidden>
-    <h2>كلمة المرور الخاصة بك</h2>
-    <p class="hint">احفظها الآن. لن تُعرض مرة أخرى.</p>
+    <div class="auth-hero">
+      <div class="auth-logo">🔑</div>
+      <h2>كلمة المرور الخاصة بك</h2>
+      <p class="subtitle">احفظها الآن — لن تُعرض مرة أخرى</p>
+    </div>
     <code id="genPass"></code>
-    <button type="button" class="ghost-btn" id="genCopy">نسخ</button>
+    <button type="button" class="ghost-btn" id="genCopy" style="width:100%">📋 نسخ</button>
     <label class="check"><input type="checkbox" id="genSaved"> حفظتها في مكان آمن</label>
-    <button class="done" id="genDone" disabled>متابعة</button>
+    <button class="done" id="genDone" disabled><span>متابعة للدخول</span></button>
   </div>
 </div>
 
+<!-- ============================================================
+     APP
+     ============================================================ -->
 <div class="app" id="app" hidden>
   <aside class="list" aria-label="المحادثات">
     <div class="bar">
-      <button class="icon-btn" id="openSettings" aria-label="الإعدادات">⚙️</button>
-      <div class="brand"><img src="icon-192.png" alt=""><h1>LMLM</h1></div>
-      <button class="icon-btn" id="newChatBtn" aria-label="محادثة جديدة">✏️</button>
-      <button class="icon-btn" id="newGroupBtn" aria-label="مجموعة جديدة">👥</button>
+      <button class="icon-btn" id="openSettings" aria-label="الإعدادات">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      </button>
+      <div class="brand">
+        <div class="brand-logo">L</div>
+        <h1>LMLM</h1>
+      </div>
+      <button class="icon-btn" id="newChatBtn" aria-label="محادثة جديدة">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+      </button>
+      <button class="icon-btn" id="newGroupBtn" aria-label="مجموعة جديدة">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      </button>
     </div>
-    <div class="search"><input id="search" type="search" placeholder="بحث" aria-label="بحث"></div>
+    <div class="search">
+      <div class="search-wrap">
+        <input id="search" type="search" placeholder="بحث في المحادثات…" aria-label="بحث">
+      </div>
+    </div>
     <ul class="chats" id="chats"></ul>
   </aside>
 
   <section class="chat" id="chat">
     <div class="empty" id="empty">
-      <img src="icon-192.png" alt="">
+      <div class="empty-logo">L</div>
       <strong>LMLM</strong>
-      <p>اختر محادثة للبدء</p>
+      <p>اختر محادثة للبدء، أو ابدأ محادثة جديدة</p>
     </div>
     <header class="bar" id="head" hidden>
-      <button class="icon-btn back" id="back" aria-label="رجوع">←</button>
+      <button class="icon-btn back" id="back" aria-label="رجوع">
+        <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      </button>
       <div class="avatar" id="headAvatar"></div>
       <div class="head-meta"><b id="title"></b><span id="status"></span></div>
-      <button class="icon-btn" id="pinBtn" aria-label="تثبيت المحادثة">📌</button>
+      <button class="icon-btn" id="pinBtn" aria-label="تثبيت المحادثة">
+        <svg viewBox="0 0 24 24"><path d="M14 4v5c0 1.12.37 2.16 1 3H9c.65-.86 1-1.9 1-3V4h4m3-2H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3V4h1c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>
+      </button>
     </header>
     <div class="msgs" id="msgs" hidden></div>
-    <div class="typing" id="typing" hidden></div>
+    <div class="typing" id="typing" hidden style="padding:6px 16px;color:var(--muted);font-size:13px;min-height:0"></div>
     <div class="reply-bar" id="replyBar" hidden>
       <div id="replyText"></div>
       <button class="icon-btn" id="cancelReply" aria-label="إلغاء">✕</button>
     </div>
     <div class="emoji-row" id="emojiRow" hidden></div>
     <form class="composer" id="form" hidden>
-      <button type="button" class="icon-btn" id="emojiBtn" aria-label="إيموجي">☺</button>
-      <label class="icon-btn pick-wrap" aria-label="إرسال صورة">🖼️<input type="file" id="imgFile" accept="image/*" class="pick-input"></label>
+      <button type="button" class="icon-btn" id="emojiBtn" aria-label="إيموجي">😊</button>
+      <label class="icon-btn pick-wrap" aria-label="إرسال صورة أو فيديو">
+        <span>📎</span>
+        <input type="file" id="mediaFile" accept="image/*,video/*" class="pick-input">
+      </label>
       <button type="button" class="icon-btn" id="micBtn" aria-label="رسالة صوتية">🎙️</button>
-      <input id="input" type="text" placeholder="اكتب رسالة" autocomplete="off" maxlength="2000" aria-label="نص الرسالة">
-      <button class="send" type="submit" aria-label="إرسال">➤</button>
+      <input id="input" type="text" placeholder="اكتب رسالة…" autocomplete="off" maxlength="2000" aria-label="نص الرسالة">
+      <button class="send" type="submit" aria-label="إرسال">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
     </form>
   </section>
 </div>
 
+<!-- ============================================================
+     SHEETS
+     ============================================================ -->
 <div class="overlay" id="newChatSheet" hidden>
   <div class="sheet">
-    <h2>محادثة جديدة</h2>
-    <div class="field"><label for="ncUser">اسم مستخدم الشخص</label><input id="ncUser" maxlength="20"></div>
-    <button class="done" id="ncGo">فتح المحادثة</button>
-    <button class="ghost" id="ncCancel" style="width:100%;margin-top:8px">إلغاء</button>
+    <div class="sheet-handle"></div>
+    <h2>✏️ محادثة جديدة</h2>
+    <div class="field"><label for="ncUser">اسم مستخدم الشخص</label><input id="ncUser" maxlength="20" placeholder="مثل: ahmed أو sara"></div>
+    <button class="done" id="ncGo"><span>فتح المحادثة</span></button>
+    <button class="ghost" id="ncCancel" style="width:100%;margin-top:10px">إلغاء</button>
   </div>
 </div>
 
 <div class="overlay" id="groupSheet" hidden>
   <div class="sheet">
-    <h2>مجموعة جديدة</h2>
-    <div class="field"><label for="gName">اسم المجموعة</label><input id="gName" maxlength="40"></div>
-    <div class="field"><label for="gUsers">أسماء مستخدمي الأعضاء (مفصولة بفاصلة)</label><input id="gUsers"></div>
-    <button class="done" id="gGo">إنشاء المجموعة</button>
-    <button class="ghost" id="gCancel" style="width:100%;margin-top:8px">إلغاء</button>
+    <div class="sheet-handle"></div>
+    <h2>👥 مجموعة جديدة</h2>
+    <div class="field"><label for="gName">اسم المجموعة</label><input id="gName" maxlength="40" placeholder="مثل: العائلة"></div>
+    <div class="field"><label for="gUsers">أسماء مستخدمي الأعضاء (مفصولة بفاصلة)</label><input id="gUsers" placeholder="ali, sara, omar"></div>
+    <button class="done" id="gGo"><span>إنشاء المجموعة</span></button>
+    <button class="ghost" id="gCancel" style="width:100%;margin-top:10px">إلغاء</button>
   </div>
 </div>
 
 <div class="overlay" id="profile" hidden>
   <div class="sheet" role="dialog" aria-modal="true">
-    <h2>الملف الشخصي</h2>
+    <div class="sheet-handle"></div>
+    <h2>👤 الملف الشخصي</h2>
     <div class="pic">
       <div class="pic-img" id="picImg"></div>
-      <label class="ghost-btn pick-wrap">تغيير الصورة<input type="file" id="picFile" accept="image/*" class="pick-input"></label>
+      <label class="ghost-btn pick-wrap">تغيير الصورة
+        <input type="file" id="picFile" accept="image/*" class="pick-input">
+      </label>
     </div>
     <div class="field"><label for="pName">الاسم</label><input id="pName" maxlength="40"></div>
     <div class="field"><label for="pUser">اسم المستخدم (ثابت)</label><input id="pUser" readonly></div>
@@ -400,19 +1166,27 @@
     <div class="field"><label for="pEmail">البريد الإلكتروني</label><input id="pEmail" type="email"></div>
     <div class="field"><label for="pPhone">رقم الهاتف</label><input id="pPhone" type="tel"></div>
     <div class="field"><label for="pLink">رابط</label><input id="pLink" type="url"></div>
-    <div class="field"><label for="pPass">كلمة مرور جديدة (اختياري)</label><input id="pPass" type="password" autocomplete="new-password"></div>
-    <button class="done" id="pSave">حفظ التغييرات</button>
-    <button class="ghost" id="pLogout" style="width:100%;margin-top:8px">تسجيل الخروج</button>
+    <div class="field"><label for="pPass">كلمة مرور جديدة (اختياري)</label>
+      <div class="password-wrap">
+        <input id="pPass" type="password" autocomplete="new-password">
+        <button type="button" class="password-toggle" data-toggle="pPass" aria-label="إظهار">👁️</button>
+      </div>
+    </div>
+    <button class="done" id="pSave"><span>💾 حفظ التغييرات</span></button>
+    <button class="ghost" id="pLogout" style="width:100%;margin-top:10px;color:var(--danger)">🚪 تسجيل الخروج</button>
     <button class="ghost" id="pClose" style="width:100%;margin-top:8px">إغلاق</button>
   </div>
 </div>
 
 <div class="overlay" id="settings" hidden>
   <div class="sheet" role="dialog" aria-modal="true">
-    <h2>الإعدادات</h2>
-    <button class="ghost" id="openProfile" style="width:100%;margin-bottom:8px">الملف الشخصي</button>
-    <button class="done" data-install style="width:100%;margin-bottom:8px">📲 تثبيت التطبيق</button>
-    <button class="ghost" data-share style="width:100%;margin-bottom:8px">🔗 مشاركة التطبيق</button>
+    <div class="sheet-handle"></div>
+    <h2>⚙️ الإعدادات</h2>
+    <button class="ghost" id="openProfile" style="width:100%;margin-bottom:10px">👤 الملف الشخصي</button>
+    <button class="done" data-install style="width:100%;margin-bottom:10px"><span>📲 تثبيت التطبيق</span></button>
+    <button class="ghost" data-share style="width:100%;margin-bottom:16px">🔗 مشاركة التطبيق</button>
+
+    <h3>المظهر</h3>
     <div class="row2"><span>الوضع</span>
       <select id="theme" aria-label="الوضع">
         <option value="system">حسب الجاهز</option>
@@ -420,8 +1194,10 @@
         <option value="dark">داكن</option>
       </select>
     </div>
+
     <h3>لون التطبيق</h3>
     <div class="swatches" id="presets"></div>
+
     <div class="row2"><span>نوع التعبئة</span>
       <select id="mode" aria-label="نوع التعبئة">
         <option value="solid">لون واحد</option>
@@ -432,33 +1208,53 @@
     <div class="row2" id="c2row"><span>اللون الثاني</span><input type="color" id="c2" aria-label="اللون الثاني"></div>
     <div class="row2" id="angleRow"><span>اتجاه التدرج</span><input type="range" id="angle" min="0" max="360" aria-label="اتجاه التدرج"></div>
     <div class="preview" id="preview"></div>
+
     <h3>طبق اللون على</h3>
     <div class="targets">
       <label><input type="checkbox" id="tBar"> الشريط العلوي</label>
       <label><input type="checkbox" id="tBtn"> الأزرار والفقاعات</label>
       <label><input type="checkbox" id="tBg"> خلفية الشاشة</label>
     </div>
-    <div class="row2"><button class="ghost" id="reset">إعادة الضبط</button><span></span></div>
-    <button class="done" id="close">تم</button>
+
+    <h3>الخط</h3>
+    <div class="row2"><span>حجم الخط</span>
+      <select id="fontSize" aria-label="حجم الخط">
+        <option value="13">صغير</option>
+        <option value="15">متوسط</option>
+        <option value="17">كبير</option>
+        <option value="19">كبير جداً</option>
+      </select>
+    </div>
+
+    <div class="row2" style="margin-top:20px">
+      <button class="ghost" id="reset">🔄 إعادة الضبط</button>
+      <span></span>
+    </div>
+    <button class="done" id="close" style="margin-top:10px"><span>تم</span></button>
   </div>
 </div>
 
-<div id="bootErr" hidden></div>
-<div class="toast" id="toast" role="status"></div>
-
-<script type="module">
+<!-- ============================================================
+     TOAST + BOOT
+     ============================================================ -->
+<div class="toast-container" id="toastContainer"></div>
+<div id="bootErr" hidden></div><script type="module">
+/* ============================================================
+   LMLM v3 — Logic
+   ============================================================ */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 
 const SUPA_URL = 'https://srvjzrrlkdyrywkhbzdi.supabase.co';
 const SUPA_KEY = 'sb_publishable_1iTsxT3RzrKNY04jzxKNvQ_mGvIPxDo';
 const FN = 'clever-processor';
 const RIM = 'lmlm.local';
-const sb = createClient(SUPA_URL, SUPA_KEY);
 
+const sb = createClient(SUPA_URL, SUPA_KEY);
 const $ = (id) => document.getElementById(id);
 const root = document.documentElement;
 const USER_RE = /^[A-Za-z0-9_]{3,20}$/;
 
+/* ---------- Utilities ---------- */
 const pickFrom = (n, set) => {
   const a = new Uint32Array(n);
   crypto.getRandomValues(a);
@@ -486,14 +1282,6 @@ const timeOf = (iso) =>
 const initial = (p) => ((p && (p.name || p.username)) || '?').charAt(0);
 const nameOf = (id) => (people[id] ? (people[id].name || people[id].username) : '...');
 
-const toast = (t) => {
-  const el = $('toast');
-  el.textContent = t;
-  el.classList.add('show');
-  clearTimeout(toast.h);
-  toast.h = setTimeout(() => el.classList.remove('show'), 2400);
-};
-
 const readFile = (f, cb) => {
   const r = new FileReader();
   r.onload = () => cb(r.result);
@@ -505,16 +1293,62 @@ function setAvatar(el, photo, letter) {
   el.textContent = photo ? '' : letter;
 }
 
+function setBusy(btn, on, label = 'جارٍ…') {
+  if (!btn) return;
+  if (on) {
+    btn.dataset.original = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-btn"></span><span>${label}</span>`;
+    btn.disabled = true;
+  } else {
+    if (btn.dataset.original) btn.innerHTML = btn.dataset.original;
+    btn.disabled = false;
+  }
+}
+
+function shakeField(el) {
+  if (!el) return;
+  el.classList.remove('error');
+  void el.offsetWidth;
+  el.classList.add('error');
+  el.focus();
+  setTimeout(() => el.classList.remove('error'), 600);
+}
+
+/* ---------- Toast System ---------- */
+function toast(message, type = 'info', duration = 3000) {
+  const container = $('toastContainer');
+  const icons = { success: '✓', error: '✕', info: 'ℹ', warn: '⚠' };
+  const el = document.createElement('div');
+  el.className = `toast-item ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ'}</span><span>${message}</span>`;
+  container.append(el);
+  setTimeout(() => {
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 250);
+  }, duration);
+}
+
+/* ---------- State ---------- */
 let me = null, profile = {}, chats = [], people = {}, msgs = [], active = null;
-let replyTo = null, editing = null, selId = null, channel = null;
+let replyTo = null, editing = null, selId = null;
+let channel = null, typingChannel = null, presenceChannel = null;
 let pendingEmail = '', pendingUser = '', pendingRim = null;
+let typingTimer = null, resendTimer = null;
+let rec = null, chunks = [];
+
 let pins = new Set();
 try { pins = new Set(JSON.parse(localStorage.getItem('lmlm-pins') || '[]')); } catch (e) {}
 const savePins = () => {
   try { localStorage.setItem('lmlm-pins', JSON.stringify([...pins])); } catch (e) {}
 };
 
-const DEF = { theme: 'system', mode: 'solid', c1: '#1E9BF0', c2: '#0E3A8C', angle: 135, tBar: true, tBtn: true, tBg: false };
+/* ---------- Settings ---------- */
+const DEF = {
+  theme: 'system', mode: 'solid',
+  c1: '#1E9BF0', c2: '#0E3A8C',
+  angle: 135, tBar: true, tBtn: true, tBg: false,
+  fontSize: '15',
+};
 let st = { ...DEF };
 try { st = { ...DEF, ...JSON.parse(localStorage.getItem('lmlm-settings') || '{}') }; } catch (e) {}
 const saveSt = () => {
@@ -526,8 +1360,11 @@ const paintVal = () =>
 function applyTheme() {
   if (st.theme === 'system') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', st.theme);
+
   const p = paintVal();
   root.style.setProperty('--sky', st.c1);
+  root.style.setProperty('--font-size-base', st.fontSize + 'px');
+
   if (st.tBar) {
     root.style.setProperty('--bar-paint', p);
     root.style.setProperty('--bar-text', '#fff');
@@ -544,6 +1381,7 @@ function applyTheme() {
   }
   if (st.tBg) root.style.setProperty('--bg-paint', p);
   else root.style.removeProperty('--bg-paint');
+
   $('preview').style.background = p;
   $('c2row').hidden = st.mode === 'solid';
   $('angleRow').hidden = st.mode === 'solid';
@@ -558,6 +1396,7 @@ function syncSettings() {
   $('tBar').checked = st.tBar;
   $('tBtn').checked = st.tBtn;
   $('tBg').checked = st.tBg;
+  $('fontSize').value = st.fontSize;
 }
 
 function change(k, v) {
@@ -567,6 +1406,7 @@ function change(k, v) {
   syncSettings();
 }
 
+/* Preset colors */
 ['#7C5CFF', '#1E9BF0', '#0E3A8C', '#00B894', '#FF7A59', '#E84393', '#2D3436'].forEach((c) => {
   const b = document.createElement('button');
   b.className = 'swatch';
@@ -578,6 +1418,8 @@ function change(k, v) {
     saveSt();
     applyTheme();
     syncSettings();
+    document.querySelectorAll('.swatch').forEach((s) => s.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
   });
   $('presets').append(b);
 });
@@ -590,17 +1432,44 @@ $('angle').addEventListener('input', (e) => change('angle', Number(e.target.valu
 $('tBar').addEventListener('change', (e) => change('tBar', e.target.checked));
 $('tBtn').addEventListener('change', (e) => change('tBtn', e.target.checked));
 $('tBg').addEventListener('change', (e) => change('tBg', e.target.checked));
+$('fontSize').addEventListener('change', (e) => change('fontSize', e.target.value));
 $('reset').addEventListener('click', () => {
   st = { ...DEF };
   saveSt();
   applyTheme();
   syncSettings();
-  toast('تم إعادة الضبط');
+  toast('تم إعادة الضبط', 'success');
 });
 $('openSettings').addEventListener('click', () => { syncSettings(); $('settings').hidden = false; });
 $('close').addEventListener('click', () => { $('settings').hidden = true; });
 $('openProfile').addEventListener('click', () => { $('settings').hidden = true; openProfile(); });
 
+/* Password toggle */
+document.querySelectorAll('[data-toggle]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const input = $(btn.dataset.toggle);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁️';
+    }
+  });
+});
+
+/* Password strength */
+$('rPass').addEventListener('input', (e) => {
+  const v = e.target.value;
+  const bar = $('rPassStrength');
+  bar.className = 'password-strength-bar';
+  if (!v) return;
+  if (v.length < 6) bar.classList.add('weak');
+  else if (v.length < 10) bar.classList.add('medium');
+  else bar.classList.add('strong');
+});
+
+/* ---------- Auth UI ---------- */
 function showView(id) {
   ['loginForm', 'chooseForm', 'rimForm', 'regForm', 'verifyBox', 'genBox'].forEach((x) => {
     $(x).hidden = x !== id;
@@ -611,63 +1480,139 @@ document.querySelectorAll('[data-go]').forEach((b) =>
   b.addEventListener('click', () => showView(b.dataset.go))
 );
 
+function showErr(el, text) {
+  el.textContent = text || '';
+  el.hidden = !text;
+}
+
+function otpMsg(m) {
+  return /expired|invalid|otp|token/i.test(m || '')
+    ? 'الرمز غير صحيح أو انتهت صلاحيته. اضغط "إعادة الإرسال".'
+    : (m || 'حدث خطأ، حاول مرة أخرى');
+}
+
+/* Login */
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = $('lId').value.trim().toLowerCase();
+  if (!id) return shakeField($('lId'));
+  if (!$('lPass').value) return shakeField($('lPass'));
   const email = id.includes('@') ? id : `${id}@${RIM}`;
   const btn = e.submitter || document.querySelector('#loginForm [type=submit]');
   setBusy(btn, true, 'جارٍ الدخول…');
   showErr($('lErr'), '');
   const { error } = await sb.auth.signInWithPassword({ email, password: $('lPass').value });
   setBusy(btn, false);
-  if (error) return showErr($('lErr'), 'بيانات غير صحيحة. تحقق من اسم المستخدم أو البريد وكلمة المرور.');
+  if (error) {
+    showErr($('lErr'), 'بيانات غير صحيحة. تحقق من اسم المستخدم/البريد وكلمة المرور.');
+    shakeField($('lPass'));
+    return;
+  }
   $('lPass').value = '';
+  toast('مرحباً بك! 👋', 'success');
   await enterApp();
 });
 
+/* Email signup */
 $('regForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const u = $('rUser').value.trim().toLowerCase();
   const email = $('rEmail').value.trim().toLowerCase();
   const pw = $('rPass').value;
-  if (!USER_RE.test(u)) return showErr($('rErr'), 'اسم المستخدم من 3 إلى 20 حرفاً إنجليزية أو أرقام أو _');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr($('rErr'), 'بريد إلكتروني غير صحيح');
-  if (pw.length < 8) return showErr($('rErr'), 'كلمة المرور 8 أحرف على الأقل');
+  if (!USER_RE.test(u)) {
+    showErr($('rErr'), 'اسم المستخدم من 3-20 حرفاً إنجليزية/أرقام/_');
+    return shakeField($('rUser'));
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showErr($('rErr'), 'بريد إلكتروني غير صحيح');
+    return shakeField($('rEmail'));
+  }
+  if (pw.length < 8) {
+    showErr($('rErr'), 'كلمة المرور 8 أحرف على الأقل');
+    return shakeField($('rPass'));
+  }
   showErr($('rErr'), '');
   const btn = e.submitter;
-  setBusy(btn, true, 'جارٍ…');
+  setBusy(btn, true, 'جارٍ الإرسال…');
   const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { username: u } } });
   setBusy(btn, false);
-  if (error) return showErr($('rErr'), error.message);
+  if (error) {
+    showErr($('rErr'), error.message);
+    toast('تعذّر إرسال الرمز', 'error');
+    return;
+  }
   pendingEmail = email;
   pendingUser = u;
   $('vTo').textContent = email;
+  startResendCountdown();
   showView('verifyBox');
+  toast('أرسلنا الرمز إلى بريدك ✉️', 'success');
 });
 
+/* Resend countdown */
+function startResendCountdown() {
+  let sec = 60;
+  const btn = $('resendBtn');
+  const countdown = $('resendCountdown');
+  btn.disabled = true;
+  countdown.textContent = sec;
+  clearInterval(resendTimer);
+  resendTimer = setInterval(() => {
+    sec--;
+    countdown.textContent = sec;
+    if (sec <= 0) {
+      clearInterval(resendTimer);
+      btn.disabled = false;
+      countdown.textContent = '0';
+    }
+  }, 1000);
+}
+
+$('resendBtn').addEventListener('click', async () => {
+  const btn = $('resendBtn');
+  if (btn.disabled) return;
+  setBusy(btn, true, 'جارٍ الإرسال…');
+  const { error } = await sb.auth.resend({ type: 'signup', email: pendingEmail });
+  setBusy(btn, false);
+  if (error) return toast(error.message, 'error');
+  toast('أُعيد إرسال الرمز ✉️', 'success');
+  startResendCountdown();
+});
+
+/* Verify */
 $('verifyBtn').addEventListener('click', async () => {
+  const code = $('vCode').value.trim();
+  if (!code) return shakeField($('vCode'));
   const btn = $('verifyBtn');
   setBusy(btn, true, 'جارٍ التحقق…');
   showErr($('vErr'), '');
   const { error } = await sb.auth.verifyOtp({
-    email: pendingEmail, token: $('vCode').value.trim(), type: 'signup',
+    email: pendingEmail, token: code, type: 'signup',
   });
   setBusy(btn, false);
-  if (error) return showErr($('vErr'), otpMsg(error.message));
-  try { await ensureProfile(pendingUser); }
-  catch (err) { return showErr($('vErr'), 'اسم المستخدم مستخدم، اختر اسماً آخر'); }
+  if (error) {
+    showErr($('vErr'), otpMsg(error.message));
+    shakeField($('vCode'));
+    return;
+  }
+  try {
+    await ensureProfile(pendingUser);
+  } catch (err) {
+    showErr($('vErr'), 'اسم المستخدم مستخدم، اختر اسماً آخر');
+    return;
+  }
+  toast('تم التحقق بنجاح ✓', 'success');
   await enterApp();
 });
 
-$('resendBtn').addEventListener('click', async () => {
-  const { error } = await sb.auth.resend({ type: 'signup', email: pendingEmail });
-  toast(error ? error.message : 'أُعيد إرسال الرمز');
-});
-
+/* RIM signup */
 $('rimForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const u = $('rimUser').value.trim().toLowerCase();
-  if (!USER_RE.test(u)) return showErr($('rimErr'), 'اسم المستخدم من 3 إلى 20 حرفاً إنجليزية أو أرقام أو _');
+  if (!USER_RE.test(u)) {
+    showErr($('rimErr'), 'اسم المستخدم من 3-20 حرفاً إنجليزية/أرقام/_');
+    return shakeField($('rimUser'));
+  }
   const pw = genRimPassword();
   const btn = e.submitter;
   setBusy(btn, true, 'جارٍ إنشاء الحساب…');
@@ -682,54 +1627,43 @@ $('rimForm').addEventListener('submit', async (e) => {
     if (error && error.context && typeof error.context.text === 'function') {
       try { why = (await error.context.text()) || why; } catch (x) {}
     }
-    return showErr($('rimErr'), 'تعذّر إنشاء الحساب: ' + why);
+    showErr($('rimErr'), 'تعذّر الإنشاء: ' + why);
+    toast('فشل إنشاء الحساب', 'error');
+    return;
   }
   pendingRim = { u, pw };
   $('genPass').textContent = pw;
   $('genSaved').checked = false;
   $('genDone').disabled = true;
   showView('genBox');
+  toast('حسابك جاهز! احفظ كلمة المرور', 'success');
 });
 
 $('genSaved').addEventListener('change', (e) => { $('genDone').disabled = !e.target.checked; });
-$('genCopy').addEventListener('click', () => {
-  try { navigator.clipboard.writeText(pendingRim.pw); } catch (e) {}
-  toast('تم النسخ');
+$('genCopy').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(pendingRim.pw);
+    toast('تم النسخ ✓', 'success');
+  } catch (e) {
+    toast('تعذّر النسخ', 'error');
+  }
 });
 $('genDone').addEventListener('click', async () => {
+  const btn = $('genDone');
+  setBusy(btn, true, 'جارٍ الدخول…');
   const { error } = await sb.auth.signInWithPassword({
     email: `${pendingRim.u}@${RIM}`, password: pendingRim.pw,
   });
+  setBusy(btn, false);
   pendingRim = null;
   if (error) {
-    toast('تعذّر الدخول، جرّب تسجيل الدخول من الشاشة الرئيسية');
+    toast('تعذّر الدخول، جرّب تسجيل الدخول', 'error');
     showView('loginForm');
     return;
   }
+  toast('مرحباً بك! 👋', 'success');
   await enterApp();
 });
-
-function setBusy(btn, on, label) {
-  if (!btn) return;
-  if (on) {
-    btn.dataset.label = btn.textContent;
-    btn.textContent = label;
-  } else if (btn.dataset.label) {
-    btn.textContent = btn.dataset.label;
-  }
-  btn.disabled = on;
-}
-
-function showErr(el, text) {
-  el.textContent = text || '';
-  el.hidden = !text;
-}
-
-function otpMsg(m) {
-  return /expired|invalid|otp|token/i.test(m || '')
-    ? 'الرمز غير صحيح أو انتهت صلاحيته. اضغط "إعادة الإرسال" ثم استخدم الرمز الجديد.'
-    : (m || 'حدث خطأ، حاول مرة أخرى');
-}
 
 async function ensureProfile(username) {
   const { data: { user } } = await sb.auth.getUser();
@@ -740,6 +1674,7 @@ async function ensureProfile(username) {
   if (error) throw error;
 }
 
+/* ---------- Enter app ---------- */
 async function enterApp() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return showView('loginForm');
@@ -748,7 +1683,7 @@ async function enterApp() {
   if (!data) {
     const uname = ((user.user_metadata && user.user_metadata.username) || user.email.split('@')[0]).toLowerCase();
     try { await ensureProfile(uname); }
-    catch (e) { toast('تعذّر إنشاء الملف الشخصي'); return; }
+    catch (e) { toast('تعذّر إنشاء الملف الشخصي', 'error'); return; }
     ({ data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle());
   }
   profile = data || {};
@@ -761,6 +1696,7 @@ async function enterApp() {
   subscribePresence();
 }
 
+/* ---------- People cache ---------- */
 async function loadPeople(ids) {
   const need = [...new Set(ids)].filter((id) => id && !people[id]);
   if (!need.length) return;
@@ -768,25 +1704,23 @@ async function loadPeople(ids) {
   (data || []).forEach((p) => { people[p.id] = p; });
 }
 
+/* ---------- Chat list ---------- */
 async function loadChats() {
   const { data: mine, error } = await sb
     .from('chat_members')
     .select('chat_id, chats(id, kind, name, created_at)')
     .eq('user_id', me.id);
-  if (error) return toast('تعذّر تحميل المحادثات');
+  if (error) return toast('تعذّر تحميل المحادثات', 'error');
   const rows = (mine || []).filter((r) => r.chats);
   const ids = rows.map((r) => r.chat_id);
-  if (!ids.length) {
-    chats = [];
-    renderList();
-    return;
-  }
+  if (!ids.length) { chats = []; renderList(); return; }
+
   const { data: mem } = await sb.from('chat_members').select('chat_id, user_id').in('chat_id', ids);
   await loadPeople((mem || []).map((m) => m.user_id));
 
   const { data: lastRows } = await sb
     .from('messages')
-    .select('chat_id, body, kind, created_at')
+    .select('chat_id, body, kind, created_at, sender_id')
     .in('chat_id', ids)
     .order('created_at', { ascending: false })
     .limit(500);
@@ -833,6 +1767,7 @@ function previewOf(last) {
   if (!last) return null;
   if (last.kind === 'voice') return '🎤 رسالة صوتية';
   if (last.kind === 'image') return '🖼️ صورة';
+  if (last.kind === 'video') return '🎬 فيديو';
   return last.body || '';
 }
 
@@ -844,7 +1779,7 @@ function renderList() {
       photo: profile.photo,
       letter: initial(profile),
       title: profile.name || profile.username,
-      sub: '@' + profile.username + ' · الملف الشخصي',
+      sub: '@' + profile.username + ' · ملفي الشخصي',
       onClick: openProfile,
     }));
   }
@@ -864,6 +1799,7 @@ function renderList() {
 }
 $('search').addEventListener('input', renderList);
 
+/* ---------- Open chat ---------- */
 async function openChat(c) {
   active = c;
   selId = null;
@@ -892,7 +1828,7 @@ async function loadMessages() {
     .eq('chat_id', cid)
     .order('created_at')
     .limit(300);
-  if (error) return toast('تعذّر تحميل الرسائل');
+  if (error) return toast('تعذّر تحميل الرسائل', 'error');
   await loadPeople(data.map((m) => m.sender_id));
   if (!active || active.id !== cid) return;
   msgs = data;
@@ -913,6 +1849,7 @@ function buildBubble(m) {
   row.dataset.id = m.id;
   const bub = document.createElement('div');
   bub.className = 'bubble' + (selId === m.id ? ' sel' : '');
+
   if (!mine && active && active.kind === 'group') {
     const f = document.createElement('div');
     f.className = 'from';
@@ -924,7 +1861,8 @@ function buildBubble(m) {
     if (q) {
       const d = document.createElement('div');
       d.className = 'quote';
-      d.textContent = q.body || (q.kind === 'voice' ? 'رسالة صوتية' : 'صورة');
+      d.innerHTML = `<b>${nameOf(q.sender_id)}</b>`;
+      d.append(document.createTextNode(q.body || (q.kind === 'voice' ? 'رسالة صوتية' : q.kind === 'image' ? 'صورة' : 'فيديو')));
       bub.append(d);
     }
   }
@@ -934,7 +1872,18 @@ function buildBubble(m) {
     im.src = m.media_url;
     im.alt = '';
     im.loading = 'lazy';
+    im.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(m.media_url); });
     bub.append(im);
+  }
+  if (m.kind === 'video' && m.media_url) {
+    const wrap = document.createElement('div');
+    wrap.className = 'video-wrap';
+    const v = document.createElement('video');
+    v.src = m.media_url;
+    v.controls = true;
+    v.preload = 'metadata';
+    wrap.append(v);
+    bub.append(wrap);
   }
   if (m.kind === 'voice' && m.media_url) {
     const au = document.createElement('audio');
@@ -949,9 +1898,10 @@ function buildBubble(m) {
   }
   const info = document.createElement('div');
   info.className = 'info';
-  if (m.edited_at) info.append(document.createTextNode('معدّلة'));
+  if (m.edited_at) info.append(document.createTextNode('معدّلة '));
   info.append(document.createTextNode(timeOf(m.created_at)));
   bub.append(info);
+
   if (selId === m.id) actionsFor(m, bub);
   bub.addEventListener('click', () => {
     selId = selId === m.id ? null : m.id;
@@ -970,37 +1920,38 @@ function actionsFor(m, bub) {
     b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
     acts.append(b);
   };
-  add('رد', () => {
+  add('↩️ رد', () => {
     replyTo = m; editing = null;
     setReply('الرد على', m.body || 'مرفق');
     $('input').focus();
   });
   if (m.sender_id === me.id) {
-    if (m.kind === 'text') add('تعديل', () => {
+    if (m.kind === 'text') add('✏️ تعديل', () => {
       editing = m; replyTo = null;
-      setReply('تعديل الرسالة', m.body);
+      setReply('تعديل', m.body);
       $('input').value = m.body;
       $('input').focus();
     });
-    add('حذف', async () => {
+    add('🗑️ حذف', async () => {
       const { error } = await sb.from('messages').delete().eq('id', m.id);
-      if (error) return toast('تعذّر الحذف');
+      if (error) return toast('تعذّر الحذف', 'error');
       msgs = msgs.filter((x) => x.id !== m.id);
       selId = null;
       renderMessages();
       loadChats();
+      toast('تم الحذف', 'success');
     });
   }
-  if (m.body) add('نسخ', () => {
-    try { navigator.clipboard.writeText(m.body); } catch (e) {}
-    toast('تم النسخ');
+  if (m.body) add('📋 نسخ', async () => {
+    try { await navigator.clipboard.writeText(m.body); toast('تم النسخ', 'success'); }
+    catch (e) { toast('تعذّر النسخ', 'error'); }
   });
   bub.append(acts);
 }
 
 function setReply(label, text) {
   if (!label) { $('replyBar').hidden = true; return; }
-  $('replyText').textContent = label + ': ' + (text || '');
+  $('replyText').innerHTML = `<b>${label}</b>${text || ''}`;
   $('replyBar').hidden = false;
 }
 
@@ -1009,6 +1960,7 @@ function clearComposer() {
   editing = null;
   replyTo = null;
   setReply(null);
+  $('send').classList.remove('ready');
 }
 
 $('cancelReply').addEventListener('click', clearComposer);
@@ -1025,14 +1977,18 @@ window.addEventListener('popstate', () => {
   }
 });
 
-async function uploadMedia(blob, ext = 'jpg') {
+/* ---------- Upload media ---------- */
+async function uploadMedia(blob, ext = 'jpg', onProgress) {
   const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+  if (onProgress) onProgress(0);
   const { error } = await sb.storage.from('media').upload(path, blob, { upsert: false });
   if (error) throw error;
+  if (onProgress) onProgress(100);
   const { data } = sb.storage.from('media').getPublicUrl(path);
   return data.publicUrl;
 }
 
+/* ---------- Send ---------- */
 async function sendMsg(extra) {
   if (!active) return;
   const cid = active.id;
@@ -1043,7 +1999,7 @@ async function sendMsg(extra) {
   replyTo = null;
   setReply(null);
   const { data, error } = await sb.from('messages').insert(row).select().single();
-  if (error) return toast('تعذّر الإرسال');
+  if (error) return toast('تعذّر الإرسال', 'error');
   if (active && active.id === cid && !msgs.find((x) => x.id === data.id)) {
     msgs.push(data);
     renderMessages();
@@ -1058,7 +2014,7 @@ $('form').addEventListener('submit', async (e) => {
   if (editing) {
     const when = new Date().toISOString();
     const { error } = await sb.from('messages').update({ body: text, edited_at: when }).eq('id', editing.id);
-    if (error) return toast('تعذّر التعديل');
+    if (error) return toast('تعذّر التعديل', 'error');
     const m = msgs.find((x) => x.id === editing.id);
     if (m) Object.assign(m, { body: text, edited_at: when });
     clearComposer();
@@ -1069,7 +2025,12 @@ $('form').addEventListener('submit', async (e) => {
   await sendMsg({ body: text });
 });
 
-const EMOJIS = ['😀', '😂', '😍', '😊', '🔥', '🎉', '❤️', '👍', '🙏', '😢', '😡', '💯'];
+$('input').addEventListener('input', (e) => {
+  $('send').classList.toggle('ready', e.target.value.trim().length > 0);
+});
+
+/* ---------- Emojis ---------- */
+const EMOJIS = ['😀','😂','😍','😊','🔥','🎉','❤️','👍','🙏','😢','😡','💯','🥰','😎','🤔','👏','✨','💪','🌹','🎈'];
 EMOJIS.forEach((em) => {
   const b = document.createElement('button');
   b.type = 'button';
@@ -1079,36 +2040,72 @@ EMOJIS.forEach((em) => {
 });
 $('emojiBtn').addEventListener('click', () => { $('emojiRow').hidden = !$('emojiRow').hidden; });
 
-$('imgFile').addEventListener('change', async (e) => {
+/* ---------- Media upload (image/video) ---------- */
+$('mediaFile').addEventListener('change', async (e) => {
   const f = e.target.files[0];
   e.target.value = '';
   if (!f || !active) return;
-  toast('جارٍ رفع الصورة…');
-  readFile(f, (src) => {
-    const im = new Image();
-    im.onload = async () => {
-      try {
-        const k = Math.min(1, 1280 / Math.max(im.width, im.height));
-        const c = document.createElement('canvas');
-        c.width = Math.round(im.width * k);
-        c.height = Math.round(im.height * k);
-        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-        const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.82));
-        const url = await uploadMedia(blob, 'jpg');
-        await sendMsg({ kind: 'image', media_url: url });
-      } catch (err) {
-        toast('تعذّر رفع الصورة');
-      }
-    };
-    im.src = src;
-  });
+
+  const isVideo = f.type.startsWith('video/');
+  const isImage = f.type.startsWith('image/');
+  if (!isVideo && !isImage) return toast('نوع الملف غير مدعوم', 'warn');
+
+  if (isVideo && f.size > 25 * 1024 * 1024) {
+    return toast('حجم الفيديو يجب أن يكون أقل من 25 ميجا', 'warn');
+  }
+  if (isImage && f.size > 10 * 1024 * 1024) {
+    return toast('حجم الصورة يجب أن يكون أقل من 10 ميجا', 'warn');
+  }
+
+  const progressEl = document.createElement('div');
+  progressEl.className = 'upload-progress';
+  progressEl.innerHTML = `<div class="spinner"></div><span>جارٍ الرفع…</span>`;
+  document.body.append(progressEl);
+
+  try {
+    if (isImage) {
+      const src = await new Promise((r) => readFile(f, r));
+      const im = new Image();
+      im.onload = async () => {
+        try {
+          const k = Math.min(1, 1600 / Math.max(im.width, im.height));
+          const c = document.createElement('canvas');
+          c.width = Math.round(im.width * k);
+          c.height = Math.round(im.height * k);
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.82));
+          const url = await uploadMedia(blob, 'jpg');
+          await sendMsg({ kind: 'image', media_url: url });
+          toast('تم إرسال الصورة', 'success');
+        } catch (err) {
+          toast('تعذّر رفع الصورة', 'error');
+        } finally {
+          progressEl.remove();
+        }
+      };
+      im.src = src;
+    } else {
+      const url = await uploadMedia(f, 'mp4');
+      await sendMsg({ kind: 'video', media_url: url });
+      toast('تم إرسال الفيديو', 'success');
+      progressEl.remove();
+    }
+  } catch (err) {
+    toast('تعذّر الرفع', 'error');
+    progressEl.remove();
+  }
 });
 
-let rec = null, chunks = [];
+/* ---------- Voice ---------- */
 $('micBtn').addEventListener('click', async () => {
   if (!active) return;
-  if (rec) { rec.stop(); return; }
-  if (!navigator.mediaDevices || !window.MediaRecorder) return toast('التسجيل الصوتي غير مدعوم');
+  if (rec) {
+    rec.stop();
+    return;
+  }
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    return toast('التسجيل الصوتي غير مدعوم', 'warn');
+  }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     chunks = [];
@@ -1120,27 +2117,39 @@ $('micBtn').addEventListener('click', async () => {
       rec = null;
       $('micBtn').classList.remove('rec');
       if (!blob.size) return;
-      toast('جارٍ رفع الصوت…');
+      const progressEl = document.createElement('div');
+      progressEl.className = 'upload-progress';
+      progressEl.innerHTML = `<div class="spinner"></div><span>جارٍ رفع الصوت…</span>`;
+      document.body.append(progressEl);
       try {
         const url = await uploadMedia(blob, 'webm');
         await sendMsg({ kind: 'voice', media_url: url });
-      } catch (err) { toast('تعذّر رفع الصوت'); }
+        toast('تم إرسال الصوت', 'success');
+      } catch (err) {
+        toast('تعذّر رفع الصوت', 'error');
+      } finally {
+        progressEl.remove();
+      }
     };
     rec.start();
     $('micBtn').classList.add('rec');
-    toast('جارٍ التسجيل… اضغط الميكروفون مرة أخرى للإرسال');
-  } catch (err) { toast('لم نتمكن من الوصول إلى الميكروفون'); }
+    toast('جارٍ التسجيل… اضغط الميكروفون مجدداً للإرسال', 'info', 4000);
+  } catch (err) {
+    toast('لم نتمكن من الوصول إلى الميكروفون', 'error');
+  }
 });
 
+/* ---------- Pin ---------- */
 $('pinBtn').addEventListener('click', () => {
   if (!active) return;
   pins.has(active.id) ? pins.delete(active.id) : pins.add(active.id);
   savePins();
   $('pinBtn').style.opacity = pins.has(active.id) ? '1' : '.45';
   renderList();
-  toast(pins.has(active.id) ? 'تم التثبيت' : 'تم إلغاء التثبيت');
+  toast(pins.has(active.id) ? 'تم التثبيت 📌' : 'تم إلغاء التثبيت', 'success');
 });
 
+/* ---------- Realtime messages ---------- */
 function subscribe() {
   if (channel) sb.removeChannel(channel);
   channel = sb.channel('lmlm-msgs')
@@ -1151,7 +2160,7 @@ function subscribe() {
           msgs.push(p.new);
           renderMessages();
         } else if (p.new.sender_id !== me.id) {
-          toast('رسالة جديدة');
+          toast('رسالة جديدة 💬', 'info', 2000);
         }
       } else if (p.eventType === 'UPDATE') {
         const m = msgs.find((x) => x.id === p.new.id);
@@ -1165,15 +2174,14 @@ function subscribe() {
     .subscribe();
 }
 
-let typingChannel = null;
-let typingTimer = null;
+/* ---------- Typing ---------- */
 function subscribeTyping() {
   if (typingChannel) sb.removeChannel(typingChannel);
   typingChannel = sb.channel('typing', { config: { broadcast: { self: false } } })
     .on('broadcast', { event: 'typing' }, (p) => {
       if (!active || p.payload.chat_id !== active.id || p.payload.uid === me.id) return;
       const t = $('typing');
-      t.textContent = nameOf(p.payload.uid) + ' يكتب…';
+      t.innerHTML = `<span>${nameOf(p.payload.uid)} يكتب</span><span class="typing-indicator"><span></span><span></span><span></span></span>`;
       t.hidden = false;
       clearTimeout(typingTimer);
       typingTimer = setTimeout(() => { t.hidden = true; }, 2500);
@@ -1189,7 +2197,7 @@ $('input').addEventListener('input', () => {
   });
 });
 
-let presenceChannel = null;
+/* ---------- Presence ---------- */
 function subscribePresence() {
   presenceChannel = sb.channel('presence:global', { config: { presence: { key: me.id } } })
     .on('presence', { event: 'sync' }, () => {
@@ -1197,9 +2205,16 @@ function subscribePresence() {
       const onlineIds = new Set(Object.keys(state));
       if (active && active.kind === 'direct') {
         const other = active.members.find((id) => id !== me.id);
-        $('status').textContent = other && onlineIds.has(other) ? 'متصل الآن' : 'محادثة خاصة';
-        if (other && onlineIds.has(other)) $('headAvatar').classList.add('online');
-        else $('headAvatar').classList.remove('online');
+        const statusEl = $('status');
+        if (other && onlineIds.has(other)) {
+          statusEl.textContent = 'متصل الآن';
+          statusEl.classList.add('online-status');
+          $('headAvatar').classList.add('online');
+        } else {
+          statusEl.textContent = 'محادثة خاصة';
+          statusEl.classList.remove('online-status');
+          $('headAvatar').classList.remove('online');
+        }
       }
     })
     .subscribe(async (status) => {
@@ -1209,26 +2224,31 @@ function subscribePresence() {
     });
 }
 
+/* ---------- New chat ---------- */
 $('newChatBtn').addEventListener('click', () => { $('ncUser').value = ''; $('newChatSheet').hidden = false; });
 $('ncCancel').addEventListener('click', () => { $('newChatSheet').hidden = true; });
 $('ncGo').addEventListener('click', async () => {
   const u = $('ncUser').value.trim().toLowerCase();
-  if (!u) return;
+  if (!u) return shakeField($('ncUser'));
+  const btn = $('ncGo');
+  setBusy(btn, true, 'جارٍ البحث…');
   const { data: p } = await sb.from('profiles').select('id, username').eq('username', u).maybeSingle();
-  if (!p) return toast('لم نجد هذا المستخدم');
-  if (p.id === me.id) return toast('لا يمكنك مراسلة نفسك');
+  setBusy(btn, false);
+  if (!p) { toast('لم نجد هذا المستخدم', 'error'); return shakeField($('ncUser')); }
+  if (p.id === me.id) { toast('لا يمكنك مراسلة نفسك', 'warn'); return; }
   const existing = chats.find((c) => c.kind === 'direct' && c.members.includes(p.id));
   $('newChatSheet').hidden = true;
   if (existing) return openChat(existing);
   const { data: cid, error } = await sb.rpc('create_chat', {
     p_kind: 'direct', p_name: null, p_members: [p.id],
   });
-  if (error) return toast('تعذّر فتح المحادثة');
+  if (error) { toast('تعذّر فتح المحادثة', 'error'); return; }
   await loadChats();
   const c = chats.find((x) => x.id === cid);
   if (c) openChat(c);
 });
 
+/* ---------- New group ---------- */
 $('newGroupBtn').addEventListener('click', () => {
   $('gName').value = '';
   $('gUsers').value = '';
@@ -1238,21 +2258,26 @@ $('gCancel').addEventListener('click', () => { $('groupSheet').hidden = true; })
 $('gGo').addEventListener('click', async () => {
   const name = $('gName').value.trim();
   const names = $('gUsers').value.split(/[,\s،]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);
-  if (!name) return toast('أدخل اسم المجموعة');
-  if (!names.length) return toast('أدخل اسم مستخدم عضو واحد على الأقل');
+  if (!name) return shakeField($('gName'));
+  if (!names.length) return shakeField($('gUsers'));
+  const btn = $('gGo');
+  setBusy(btn, true, 'جارٍ الإنشاء…');
   const { data: ps } = await sb.from('profiles').select('id, username').in('username', names);
   const ids = (ps || []).map((p) => p.id).filter((id) => id !== me.id);
-  if (!ids.length) return toast('لم نجد الأعضاء');
+  if (!ids.length) { setBusy(btn, false); toast('لم نجد الأعضاء', 'error'); return; }
   const { data: cid, error } = await sb.rpc('create_chat', {
     p_kind: 'group', p_name: name, p_members: ids,
   });
-  if (error) return toast('تعذّر إنشاء المجموعة');
+  setBusy(btn, false);
+  if (error) { toast('تعذّر الإنشاء', 'error'); return; }
   $('groupSheet').hidden = true;
   await loadChats();
   const c = chats.find((x) => x.id === cid);
   if (c) openChat(c);
+  toast('تم إنشاء المجموعة ✓', 'success');
 });
 
+/* ---------- Profile ---------- */
 function paintPic() { setAvatar($('picImg'), profile.photo, initial(profile)); }
 
 function openProfile() {
@@ -1277,22 +2302,28 @@ $('picFile').addEventListener('change', (e) => {
   readFile(f, (src) => {
     const im = new Image();
     im.onload = async () => {
+      const progressEl = document.createElement('div');
+      progressEl.className = 'upload-progress';
+      progressEl.innerHTML = `<div class="spinner"></div><span>جارٍ الرفع…</span>`;
+      document.body.append(progressEl);
       try {
         const side = Math.min(im.width, im.height);
         const c = document.createElement('canvas');
-        c.width = c.height = 256;
-        c.getContext('2d').drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, 256, 256);
+        c.width = c.height = 320;
+        c.getContext('2d').drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, 320, 320);
         const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85));
         const photo = await uploadMedia(blob, 'jpg');
         const { error } = await sb.from('profiles').update({ photo }).eq('id', me.id);
-        if (error) return toast('تعذّر حفظ الصورة');
+        if (error) throw error;
         profile.photo = photo;
         people[me.id] = profile;
         paintPic();
         renderList();
-        toast('تم تحديث الصورة');
+        toast('تم تحديث الصورة ✓', 'success');
       } catch (err) {
-        toast('تعذّر رفع الصورة');
+        toast('تعذّر الرفع', 'error');
+      } finally {
+        progressEl.remove();
       }
     };
     im.src = src;
@@ -1309,71 +2340,83 @@ $('pSave').addEventListener('click', async () => {
     email: $('pEmail').value.trim() || null,
     phone: $('pPhone').value.trim() || null,
   };
+  const btn = $('pSave');
+  setBusy(btn, true, 'جارٍ الحفظ…');
   const { error } = await sb.from('profiles').update(patch).eq('id', me.id);
-  if (error) return toast('تعذّر الحفظ');
+  setBusy(btn, false);
+  if (error) return toast('تعذّر الحفظ', 'error');
   Object.assign(profile, patch);
   people[me.id] = profile;
   const np = $('pPass').value;
   if (np) {
-    if (np.length < 8) return toast('كلمة المرور 8 أحرف على الأقل');
+    if (np.length < 8) return toast('كلمة المرور 8 أحرف على الأقل', 'warn');
     const { error: e2 } = await sb.auth.updateUser({ password: np });
-    if (e2) return toast('تعذّر تغيير كلمة المرور');
+    if (e2) return toast('تعذّر تغيير كلمة المرور', 'error');
     $('pPass').value = '';
   }
   renderList();
-  toast('تم الحفظ');
+  toast('تم الحفظ ✓', 'success');
 });
 
 $('pLogout').addEventListener('click', async () => {
+  if (!confirm('هل تريد تسجيل الخروج؟')) return;
   await sb.auth.signOut();
   location.reload();
 });
 
-applyTheme();
-syncSettings();
+/* ---------- Lightbox ---------- */
+function openLightbox(src) {
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  const img = document.createElement('img');
+  img.src = src;
+  const close = document.createElement('button');
+  close.className = 'lightbox-close';
+  close.textContent = '✕';
+  lb.append(img, close);
+  const closeFn = () => lb.remove();
+  lb.addEventListener('click', (e) => { if (e.target === lb) closeFn(); });
+  close.addEventListener('click', closeFn);
+  document.body.append(lb);
+}
 
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) await enterApp();
-  else showView('loginForm');
-})();
-
+/* ---------- Install / Share ---------- */
 (() => {
   let deferred = null;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; });
-  window.addEventListener('appinstalled', () => { deferred = null; toast('تم تثبيت LMLM على جهازك'); });
+  window.addEventListener('appinstalled', () => { deferred = null; toast('تم التثبيت ✓', 'success'); });
 
   document.querySelectorAll('[data-install]').forEach((b) => b.addEventListener('click', async () => {
-    if (isStandalone) return toast('التطبيق مثبَّت بالفعل');
+    if (isStandalone) return toast('التطبيق مثبَّت بالفعل', 'info');
     if (deferred) {
       deferred.prompt();
       await deferred.userChoice;
       deferred = null;
       return;
     }
-    if (isIOS) return toast('على iPhone: اضغط زر المشاركة ثم اختر "إضافة إلى الشاشة الرئيسية"');
-    toast('من قائمة المتصفح ⋮ اختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية"');
+    if (isIOS) return toast('على iPhone: اضغط زر المشاركة ← "إضافة إلى الشاشة الرئيسية"', 'info', 6000);
+    toast('من قائمة المتصفح ⋮ اختر "تثبيت التطبيق"', 'info', 5000);
   }));
 
   document.querySelectorAll('[data-share]').forEach((b) => b.addEventListener('click', async () => {
-    const data = {
-      title: 'LMLM',
-      text: 'انضم إلى LMLM',
-      url: location.origin + location.pathname,
-    };
+    const data = { title: 'LMLM', text: 'انضم إلى LMLM', url: location.origin + location.pathname };
     if (navigator.share) {
       try { await navigator.share(data); } catch (e) {}
       return;
     }
     try {
       await navigator.clipboard.writeText(data.url);
-      toast('تم نسخ رابط التطبيق');
-    } catch (e) { toast(data.url); }
+      toast('تم نسخ الرابط ✓', 'success');
+    } catch (e) { toast(data.url, 'info', 6000); }
   }));
 })();
+
+/* ---------- Boot ---------- */
+applyTheme();
+syncSettings();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -1385,13 +2428,11 @@ window.addEventListener('error', (e) => {
   b.textContent = 'خطأ: ' + (e.message || e);
 });
 
-setTimeout(() => {
-  if (!window.__lmlmReady && $('app').hidden && $('auth').hidden) {
-    const b = $('bootErr');
-    b.hidden = false;
-    b.textContent = 'لم يكتمل تحميل التطبيق. تحقق من الاتصال بالإنترنت ثم أعد فتح الصفحة.';
-  }
-}, 6000);
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await enterApp();
+  else showView('loginForm');
+})();
 
 window.__lmlmReady = true;
 </script>

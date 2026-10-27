@@ -489,4 +489,911 @@ const nameOf = (id) => (people[id] ? (people[id].name || people[id].username) : 
 const toast = (t) => {
   const el = $('toast');
   el.textContent = t;
-  el.classList.add('
+  el.classList.add('show');
+  clearTimeout(toast.h);
+  toast.h = setTimeout(() => el.classList.remove('show'), 2400);
+};
+
+const readFile = (f, cb) => {
+  const r = new FileReader();
+  r.onload = () => cb(r.result);
+  r.readAsDataURL(f);
+};
+
+function setAvatar(el, photo, letter) {
+  el.style.backgroundImage = photo ? `url(${photo})` : '';
+  el.textContent = photo ? '' : letter;
+}
+
+let me = null, profile = {}, chats = [], people = {}, msgs = [], active = null;
+let replyTo = null, editing = null, selId = null, channel = null;
+let pendingEmail = '', pendingUser = '', pendingRim = null;
+let pins = new Set();
+try { pins = new Set(JSON.parse(localStorage.getItem('lmlm-pins') || '[]')); } catch (e) {}
+const savePins = () => {
+  try { localStorage.setItem('lmlm-pins', JSON.stringify([...pins])); } catch (e) {}
+};
+
+const DEF = { theme: 'system', mode: 'solid', c1: '#1E9BF0', c2: '#0E3A8C', angle: 135, tBar: true, tBtn: true, tBg: false };
+let st = { ...DEF };
+try { st = { ...DEF, ...JSON.parse(localStorage.getItem('lmlm-settings') || '{}') }; } catch (e) {}
+const saveSt = () => {
+  try { localStorage.setItem('lmlm-settings', JSON.stringify(st)); } catch (e) {}
+};
+const paintVal = () =>
+  st.mode === 'solid' ? st.c1 : `linear-gradient(${st.angle}deg, ${st.c1}, ${st.c2})`;
+
+function applyTheme() {
+  if (st.theme === 'system') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', st.theme);
+  const p = paintVal();
+  root.style.setProperty('--sky', st.c1);
+  if (st.tBar) {
+    root.style.setProperty('--bar-paint', p);
+    root.style.setProperty('--bar-text', '#fff');
+  } else {
+    root.style.removeProperty('--bar-paint');
+    root.style.removeProperty('--bar-text');
+  }
+  if (st.tBtn) {
+    root.style.setProperty('--btn-paint', p);
+    root.style.setProperty('--btn-text', '#fff');
+  } else {
+    root.style.removeProperty('--btn-paint');
+    root.style.removeProperty('--btn-text');
+  }
+  if (st.tBg) root.style.setProperty('--bg-paint', p);
+  else root.style.removeProperty('--bg-paint');
+  $('preview').style.background = p;
+  $('c2row').hidden = st.mode === 'solid';
+  $('angleRow').hidden = st.mode === 'solid';
+}
+
+function syncSettings() {
+  $('theme').value = st.theme;
+  $('mode').value = st.mode;
+  $('c1').value = st.c1;
+  $('c2').value = st.c2;
+  $('angle').value = st.angle;
+  $('tBar').checked = st.tBar;
+  $('tBtn').checked = st.tBtn;
+  $('tBg').checked = st.tBg;
+}
+
+function change(k, v) {
+  st[k] = v;
+  saveSt();
+  applyTheme();
+  syncSettings();
+}
+
+['#7C5CFF', '#1E9BF0', '#0E3A8C', '#00B894', '#FF7A59', '#E84393', '#2D3436'].forEach((c) => {
+  const b = document.createElement('button');
+  b.className = 'swatch';
+  b.style.background = c;
+  b.setAttribute('aria-label', 'لون ' + c);
+  b.addEventListener('click', () => {
+    st.c1 = c;
+    st.mode = 'solid';
+    saveSt();
+    applyTheme();
+    syncSettings();
+  });
+  $('presets').append(b);
+});
+
+$('theme').addEventListener('change', (e) => change('theme', e.target.value));
+$('mode').addEventListener('change', (e) => change('mode', e.target.value));
+$('c1').addEventListener('input', (e) => change('c1', e.target.value));
+$('c2').addEventListener('input', (e) => change('c2', e.target.value));
+$('angle').addEventListener('input', (e) => change('angle', Number(e.target.value)));
+$('tBar').addEventListener('change', (e) => change('tBar', e.target.checked));
+$('tBtn').addEventListener('change', (e) => change('tBtn', e.target.checked));
+$('tBg').addEventListener('change', (e) => change('tBg', e.target.checked));
+$('reset').addEventListener('click', () => {
+  st = { ...DEF };
+  saveSt();
+  applyTheme();
+  syncSettings();
+  toast('تم إعادة الضبط');
+});
+$('openSettings').addEventListener('click', () => { syncSettings(); $('settings').hidden = false; });
+$('close').addEventListener('click', () => { $('settings').hidden = true; });
+$('openProfile').addEventListener('click', () => { $('settings').hidden = true; openProfile(); });
+
+function showView(id) {
+  ['loginForm', 'chooseForm', 'rimForm', 'regForm', 'verifyBox', 'genBox'].forEach((x) => {
+    $(x).hidden = x !== id;
+  });
+  $('auth').hidden = false;
+}
+document.querySelectorAll('[data-go]').forEach((b) =>
+  b.addEventListener('click', () => showView(b.dataset.go))
+);
+
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('lId').value.trim().toLowerCase();
+  const email = id.includes('@') ? id : `${id}@${RIM}`;
+  const btn = e.submitter || document.querySelector('#loginForm [type=submit]');
+  setBusy(btn, true, 'جارٍ الدخول…');
+  showErr($('lErr'), '');
+  const { error } = await sb.auth.signInWithPassword({ email, password: $('lPass').value });
+  setBusy(btn, false);
+  if (error) return showErr($('lErr'), 'بيانات غير صحيحة. تحقق من اسم المستخدم أو البريد وكلمة المرور.');
+  $('lPass').value = '';
+  await enterApp();
+});
+
+$('regForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const u = $('rUser').value.trim().toLowerCase();
+  const email = $('rEmail').value.trim().toLowerCase();
+  const pw = $('rPass').value;
+  if (!USER_RE.test(u)) return showErr($('rErr'), 'اسم المستخدم من 3 إلى 20 حرفاً إنجليزية أو أرقام أو _');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr($('rErr'), 'بريد إلكتروني غير صحيح');
+  if (pw.length < 8) return showErr($('rErr'), 'كلمة المرور 8 أحرف على الأقل');
+  showErr($('rErr'), '');
+  const btn = e.submitter;
+  setBusy(btn, true, 'جارٍ…');
+  const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { username: u } } });
+  setBusy(btn, false);
+  if (error) return showErr($('rErr'), error.message);
+  pendingEmail = email;
+  pendingUser = u;
+  $('vTo').textContent = email;
+  showView('verifyBox');
+});
+
+$('verifyBtn').addEventListener('click', async () => {
+  const btn = $('verifyBtn');
+  setBusy(btn, true, 'جارٍ التحقق…');
+  showErr($('vErr'), '');
+  const { error } = await sb.auth.verifyOtp({
+    email: pendingEmail, token: $('vCode').value.trim(), type: 'signup',
+  });
+  setBusy(btn, false);
+  if (error) return showErr($('vErr'), otpMsg(error.message));
+  try { await ensureProfile(pendingUser); }
+  catch (err) { return showErr($('vErr'), 'اسم المستخدم مستخدم، اختر اسماً آخر'); }
+  await enterApp();
+});
+
+$('resendBtn').addEventListener('click', async () => {
+  const { error } = await sb.auth.resend({ type: 'signup', email: pendingEmail });
+  toast(error ? error.message : 'أُعيد إرسال الرمز');
+});
+
+$('rimForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const u = $('rimUser').value.trim().toLowerCase();
+  if (!USER_RE.test(u)) return showErr($('rimErr'), 'اسم المستخدم من 3 إلى 20 حرفاً إنجليزية أو أرقام أو _');
+  const pw = genRimPassword();
+  const btn = e.submitter;
+  setBusy(btn, true, 'جارٍ إنشاء الحساب…');
+  showErr($('rimErr'), '');
+  let res;
+  try { res = await sb.functions.invoke(FN, { body: { username: u, password: pw } }); }
+  catch (err) { res = { error: err }; }
+  setBusy(btn, false);
+  const { data, error } = res;
+  if (error || (data && data.error)) {
+    let why = (data && data.error) || (error && error.message) || 'سبب غير معروف';
+    if (error && error.context && typeof error.context.text === 'function') {
+      try { why = (await error.context.text()) || why; } catch (x) {}
+    }
+    return showErr($('rimErr'), 'تعذّر إنشاء الحساب: ' + why);
+  }
+  pendingRim = { u, pw };
+  $('genPass').textContent = pw;
+  $('genSaved').checked = false;
+  $('genDone').disabled = true;
+  showView('genBox');
+});
+
+$('genSaved').addEventListener('change', (e) => { $('genDone').disabled = !e.target.checked; });
+$('genCopy').addEventListener('click', () => {
+  try { navigator.clipboard.writeText(pendingRim.pw); } catch (e) {}
+  toast('تم النسخ');
+});
+$('genDone').addEventListener('click', async () => {
+  const { error } = await sb.auth.signInWithPassword({
+    email: `${pendingRim.u}@${RIM}`, password: pendingRim.pw,
+  });
+  pendingRim = null;
+  if (error) {
+    toast('تعذّر الدخول، جرّب تسجيل الدخول من الشاشة الرئيسية');
+    showView('loginForm');
+    return;
+  }
+  await enterApp();
+});
+
+function setBusy(btn, on, label) {
+  if (!btn) return;
+  if (on) {
+    btn.dataset.label = btn.textContent;
+    btn.textContent = label;
+  } else if (btn.dataset.label) {
+    btn.textContent = btn.dataset.label;
+  }
+  btn.disabled = on;
+}
+
+function showErr(el, text) {
+  el.textContent = text || '';
+  el.hidden = !text;
+}
+
+function otpMsg(m) {
+  return /expired|invalid|otp|token/i.test(m || '')
+    ? 'الرمز غير صحيح أو انتهت صلاحيته. اضغط "إعادة الإرسال" ثم استخدم الرمز الجديد.'
+    : (m || 'حدث خطأ، حاول مرة أخرى');
+}
+
+async function ensureProfile(username) {
+  const { data: { user } } = await sb.auth.getUser();
+  const { error } = await sb.from('profiles').upsert(
+    { id: user.id, username, name: username },
+    { onConflict: 'id' }
+  );
+  if (error) throw error;
+}
+
+async function enterApp() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return showView('loginForm');
+  me = user;
+  let { data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  if (!data) {
+    const uname = ((user.user_metadata && user.user_metadata.username) || user.email.split('@')[0]).toLowerCase();
+    try { await ensureProfile(uname); }
+    catch (e) { toast('تعذّر إنشاء الملف الشخصي'); return; }
+    ({ data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle());
+  }
+  profile = data || {};
+  people[me.id] = profile;
+  $('auth').hidden = true;
+  $('app').hidden = false;
+  await loadChats();
+  subscribe();
+  subscribeTyping();
+  subscribePresence();
+}
+
+async function loadPeople(ids) {
+  const need = [...new Set(ids)].filter((id) => id && !people[id]);
+  if (!need.length) return;
+  const { data } = await sb.from('profiles').select('id, username, name, photo, bio, city, link').in('id', need);
+  (data || []).forEach((p) => { people[p.id] = p; });
+}
+
+async function loadChats() {
+  const { data: mine, error } = await sb
+    .from('chat_members')
+    .select('chat_id, chats(id, kind, name, created_at)')
+    .eq('user_id', me.id);
+  if (error) return toast('تعذّر تحميل المحادثات');
+  const rows = (mine || []).filter((r) => r.chats);
+  const ids = rows.map((r) => r.chat_id);
+  if (!ids.length) {
+    chats = [];
+    renderList();
+    return;
+  }
+  const { data: mem } = await sb.from('chat_members').select('chat_id, user_id').in('chat_id', ids);
+  await loadPeople((mem || []).map((m) => m.user_id));
+
+  const { data: lastRows } = await sb
+    .from('messages')
+    .select('chat_id, body, kind, created_at')
+    .in('chat_id', ids)
+    .order('created_at', { ascending: false })
+    .limit(500);
+  const lastBy = {};
+  (lastRows || []).forEach((m) => { if (!lastBy[m.chat_id]) lastBy[m.chat_id] = m; });
+
+  chats = rows.map((r) => {
+    const c = r.chats;
+    const members = (mem || []).filter((m) => m.chat_id === c.id).map((m) => m.user_id);
+    const others = members.filter((id) => id !== me.id).map((id) => people[id]).filter(Boolean);
+    const last = lastBy[c.id] || null;
+    return {
+      id: c.id, kind: c.kind, members,
+      title: c.kind === 'group' ? (c.name || 'مجموعة') : (others[0] ? (others[0].name || others[0].username) : 'محادثة'),
+      photo: c.kind === 'direct' && others[0] ? others[0].photo : null,
+      count: members.length, last, at: last ? last.created_at : c.created_at,
+    };
+  });
+  renderList();
+}
+
+function makeRow({ photo, letter, title, sub, time, cls, onClick }) {
+  const li = document.createElement('li');
+  const b = document.createElement('button');
+  b.className = 'item ' + (cls || '');
+  const av = document.createElement('div');
+  av.className = 'avatar';
+  setAvatar(av, photo, letter);
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const t = document.createElement('b'); t.textContent = title;
+  const s = document.createElement('span'); s.textContent = sub;
+  meta.append(t, s);
+  const side = document.createElement('div');
+  side.className = 'side';
+  side.append(document.createTextNode(time || ''));
+  b.append(av, meta, side);
+  b.addEventListener('click', onClick);
+  li.append(b);
+  return li;
+}
+
+function previewOf(last) {
+  if (!last) return null;
+  if (last.kind === 'voice') return '🎤 رسالة صوتية';
+  if (last.kind === 'image') return '🖼️ صورة';
+  return last.body || '';
+}
+
+function renderList() {
+  const ul = $('chats');
+  ul.innerHTML = '';
+  if (profile && profile.id) {
+    ul.append(makeRow({
+      photo: profile.photo,
+      letter: initial(profile),
+      title: profile.name || profile.username,
+      sub: '@' + profile.username + ' · الملف الشخصي',
+      onClick: openProfile,
+    }));
+  }
+  const q = $('search').value.trim();
+  const list = chats
+    .filter((c) => !q || c.title.includes(q))
+    .sort((a, b) => (pins.has(b.id) - pins.has(a.id)) || (a.at < b.at ? 1 : -1));
+  list.forEach((c) => ul.append(makeRow({
+    photo: c.photo,
+    letter: c.title.charAt(0),
+    title: c.title,
+    sub: previewOf(c.last) || (c.kind === 'group' ? c.count + ' أعضاء' : 'ابدأ المحادثة'),
+    time: c.last ? timeOf(c.last.created_at) : '',
+    cls: (active && c.id === active.id ? 'current ' : '') + (pins.has(c.id) ? 'pinned' : ''),
+    onClick: () => openChat(c),
+  })));
+}
+$('search').addEventListener('input', renderList);
+
+async function openChat(c) {
+  active = c;
+  selId = null;
+  clearComposer();
+  $('app').classList.add('in-chat');
+  $('empty').hidden = true;
+  $('chat').classList.add('open');
+  $('head').hidden = false;
+  $('msgs').hidden = false;
+  $('form').hidden = false;
+  $('title').textContent = c.title;
+  $('status').textContent = c.kind === 'group' ? c.count + ' أعضاء' : 'محادثة خاصة';
+  setAvatar($('headAvatar'), c.photo, c.title.charAt(0));
+  $('pinBtn').style.opacity = pins.has(c.id) ? '1' : '.45';
+  await loadMessages();
+  renderList();
+  if (history.state?.chat !== c.id) history.pushState({ chat: c.id }, '');
+}
+
+async function loadMessages() {
+  if (!active) return;
+  const cid = active.id;
+  const { data, error } = await sb
+    .from('messages')
+    .select('*')
+    .eq('chat_id', cid)
+    .order('created_at')
+    .limit(300);
+  if (error) return toast('تعذّر تحميل الرسائل');
+  await loadPeople(data.map((m) => m.sender_id));
+  if (!active || active.id !== cid) return;
+  msgs = data;
+  renderMessages();
+}
+
+function renderMessages() {
+  const box = $('msgs');
+  box.innerHTML = '';
+  msgs.forEach((m) => box.append(buildBubble(m)));
+  box.scrollTop = box.scrollHeight;
+}
+
+function buildBubble(m) {
+  const mine = m.sender_id === me.id;
+  const row = document.createElement('div');
+  row.className = 'row ' + (mine ? 'me' : 'them');
+  row.dataset.id = m.id;
+  const bub = document.createElement('div');
+  bub.className = 'bubble' + (selId === m.id ? ' sel' : '');
+  if (!mine && active && active.kind === 'group') {
+    const f = document.createElement('div');
+    f.className = 'from';
+    f.textContent = nameOf(m.sender_id);
+    bub.append(f);
+  }
+  if (m.reply_to) {
+    const q = msgs.find((x) => x.id === m.reply_to);
+    if (q) {
+      const d = document.createElement('div');
+      d.className = 'quote';
+      d.textContent = q.body || (q.kind === 'voice' ? 'رسالة صوتية' : 'صورة');
+      bub.append(d);
+    }
+  }
+  if (m.kind === 'image' && m.media_url) {
+    const im = document.createElement('img');
+    im.className = 'img';
+    im.src = m.media_url;
+    im.alt = '';
+    im.loading = 'lazy';
+    bub.append(im);
+  }
+  if (m.kind === 'voice' && m.media_url) {
+    const au = document.createElement('audio');
+    au.controls = true;
+    au.src = m.media_url;
+    bub.append(au);
+  }
+  if (m.body) {
+    const t = document.createElement('div');
+    t.textContent = m.body;
+    bub.append(t);
+  }
+  const info = document.createElement('div');
+  info.className = 'info';
+  if (m.edited_at) info.append(document.createTextNode('معدّلة'));
+  info.append(document.createTextNode(timeOf(m.created_at)));
+  bub.append(info);
+  if (selId === m.id) actionsFor(m, bub);
+  bub.addEventListener('click', () => {
+    selId = selId === m.id ? null : m.id;
+    renderMessages();
+  });
+  row.append(bub);
+  return row;
+}
+
+function actionsFor(m, bub) {
+  const acts = document.createElement('div');
+  acts.className = 'actions';
+  const add = (label, fn) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+    acts.append(b);
+  };
+  add('رد', () => {
+    replyTo = m; editing = null;
+    setReply('الرد على', m.body || 'مرفق');
+    $('input').focus();
+  });
+  if (m.sender_id === me.id) {
+    if (m.kind === 'text') add('تعديل', () => {
+      editing = m; replyTo = null;
+      setReply('تعديل الرسالة', m.body);
+      $('input').value = m.body;
+      $('input').focus();
+    });
+    add('حذف', async () => {
+      const { error } = await sb.from('messages').delete().eq('id', m.id);
+      if (error) return toast('تعذّر الحذف');
+      msgs = msgs.filter((x) => x.id !== m.id);
+      selId = null;
+      renderMessages();
+      loadChats();
+    });
+  }
+  if (m.body) add('نسخ', () => {
+    try { navigator.clipboard.writeText(m.body); } catch (e) {}
+    toast('تم النسخ');
+  });
+  bub.append(acts);
+}
+
+function setReply(label, text) {
+  if (!label) { $('replyBar').hidden = true; return; }
+  $('replyText').textContent = label + ': ' + (text || '');
+  $('replyBar').hidden = false;
+}
+
+function clearComposer() {
+  $('input').value = '';
+  editing = null;
+  replyTo = null;
+  setReply(null);
+}
+
+$('cancelReply').addEventListener('click', clearComposer);
+$('back').addEventListener('click', () => {
+  $('chat').classList.remove('open');
+  $('app').classList.remove('in-chat');
+  if (history.state?.chat) history.back();
+});
+
+window.addEventListener('popstate', () => {
+  if ($('chat').classList.contains('open')) {
+    $('chat').classList.remove('open');
+    $('app').classList.remove('in-chat');
+  }
+});
+
+async function uploadMedia(blob, ext = 'jpg') {
+  const path = `${me.id}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await sb.storage.from('media').upload(path, blob, { upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from('media').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function sendMsg(extra) {
+  if (!active) return;
+  const cid = active.id;
+  const row = {
+    chat_id: cid, kind: 'text', body: null, media_url: null,
+    reply_to: replyTo ? replyTo.id : null, ...extra,
+  };
+  replyTo = null;
+  setReply(null);
+  const { data, error } = await sb.from('messages').insert(row).select().single();
+  if (error) return toast('تعذّر الإرسال');
+  if (active && active.id === cid && !msgs.find((x) => x.id === data.id)) {
+    msgs.push(data);
+    renderMessages();
+  }
+  loadChats();
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = $('input').value.trim();
+  if (!active || !text) return;
+  if (editing) {
+    const when = new Date().toISOString();
+    const { error } = await sb.from('messages').update({ body: text, edited_at: when }).eq('id', editing.id);
+    if (error) return toast('تعذّر التعديل');
+    const m = msgs.find((x) => x.id === editing.id);
+    if (m) Object.assign(m, { body: text, edited_at: when });
+    clearComposer();
+    renderMessages();
+    return;
+  }
+  $('input').value = '';
+  await sendMsg({ body: text });
+});
+
+const EMOJIS = ['😀', '😂', '😍', '😊', '🔥', '🎉', '❤️', '👍', '🙏', '😢', '😡', '💯'];
+EMOJIS.forEach((em) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = em;
+  b.addEventListener('click', () => { $('input').value += em; $('input').focus(); });
+  $('emojiRow').append(b);
+});
+$('emojiBtn').addEventListener('click', () => { $('emojiRow').hidden = !$('emojiRow').hidden; });
+
+$('imgFile').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f || !active) return;
+  toast('جارٍ رفع الصورة…');
+  readFile(f, (src) => {
+    const im = new Image();
+    im.onload = async () => {
+      try {
+        const k = Math.min(1, 1280 / Math.max(im.width, im.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(im.width * k);
+        c.height = Math.round(im.height * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.82));
+        const url = await uploadMedia(blob, 'jpg');
+        await sendMsg({ kind: 'image', media_url: url });
+      } catch (err) {
+        toast('تعذّر رفع الصورة');
+      }
+    };
+    im.src = src;
+  });
+});
+
+let rec = null, chunks = [];
+$('micBtn').addEventListener('click', async () => {
+  if (!active) return;
+  if (rec) { rec.stop(); return; }
+  if (!navigator.mediaDevices || !window.MediaRecorder) return toast('التسجيل الصوتي غير مدعوم');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    chunks = [];
+    rec = new MediaRecorder(stream);
+    rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = async () => {
+      stream.getTracks().forEach((t) => t.stop());
+      const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+      rec = null;
+      $('micBtn').classList.remove('rec');
+      if (!blob.size) return;
+      toast('جارٍ رفع الصوت…');
+      try {
+        const url = await uploadMedia(blob, 'webm');
+        await sendMsg({ kind: 'voice', media_url: url });
+      } catch (err) { toast('تعذّر رفع الصوت'); }
+    };
+    rec.start();
+    $('micBtn').classList.add('rec');
+    toast('جارٍ التسجيل… اضغط الميكروفون مرة أخرى للإرسال');
+  } catch (err) { toast('لم نتمكن من الوصول إلى الميكروفون'); }
+});
+
+$('pinBtn').addEventListener('click', () => {
+  if (!active) return;
+  pins.has(active.id) ? pins.delete(active.id) : pins.add(active.id);
+  savePins();
+  $('pinBtn').style.opacity = pins.has(active.id) ? '1' : '.45';
+  renderList();
+  toast(pins.has(active.id) ? 'تم التثبيت' : 'تم إلغاء التثبيت');
+});
+
+function subscribe() {
+  if (channel) sb.removeChannel(channel);
+  channel = sb.channel('lmlm-msgs')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, async (p) => {
+      if (p.eventType === 'INSERT') {
+        if (active && p.new.chat_id === active.id && !msgs.find((x) => x.id === p.new.id)) {
+          await loadPeople([p.new.sender_id]);
+          msgs.push(p.new);
+          renderMessages();
+        } else if (p.new.sender_id !== me.id) {
+          toast('رسالة جديدة');
+        }
+      } else if (p.eventType === 'UPDATE') {
+        const m = msgs.find((x) => x.id === p.new.id);
+        if (m) { Object.assign(m, p.new); renderMessages(); }
+      } else if (p.eventType === 'DELETE') {
+        msgs = msgs.filter((x) => x.id !== (p.old && p.old.id));
+        if (active) renderMessages();
+      }
+      loadChats();
+    })
+    .subscribe();
+}
+
+let typingChannel = null;
+let typingTimer = null;
+function subscribeTyping() {
+  if (typingChannel) sb.removeChannel(typingChannel);
+  typingChannel = sb.channel('typing', { config: { broadcast: { self: false } } })
+    .on('broadcast', { event: 'typing' }, (p) => {
+      if (!active || p.payload.chat_id !== active.id || p.payload.uid === me.id) return;
+      const t = $('typing');
+      t.textContent = nameOf(p.payload.uid) + ' يكتب…';
+      t.hidden = false;
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => { t.hidden = true; }, 2500);
+    })
+    .subscribe();
+}
+$('input').addEventListener('input', () => {
+  if (!active || !typingChannel) return;
+  typingChannel.send({
+    type: 'broadcast',
+    event: 'typing',
+    payload: { uid: me.id, chat_id: active.id },
+  });
+});
+
+let presenceChannel = null;
+function subscribePresence() {
+  presenceChannel = sb.channel('presence:global', { config: { presence: { key: me.id } } })
+    .on('presence', { event: 'sync' }, () => {
+      const state = presenceChannel.presenceState();
+      const onlineIds = new Set(Object.keys(state));
+      if (active && active.kind === 'direct') {
+        const other = active.members.find((id) => id !== me.id);
+        $('status').textContent = other && onlineIds.has(other) ? 'متصل الآن' : 'محادثة خاصة';
+        if (other && onlineIds.has(other)) $('headAvatar').classList.add('online');
+        else $('headAvatar').classList.remove('online');
+      }
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await presenceChannel.track({ online_at: new Date().toISOString() });
+      }
+    });
+}
+
+$('newChatBtn').addEventListener('click', () => { $('ncUser').value = ''; $('newChatSheet').hidden = false; });
+$('ncCancel').addEventListener('click', () => { $('newChatSheet').hidden = true; });
+$('ncGo').addEventListener('click', async () => {
+  const u = $('ncUser').value.trim().toLowerCase();
+  if (!u) return;
+  const { data: p } = await sb.from('profiles').select('id, username').eq('username', u).maybeSingle();
+  if (!p) return toast('لم نجد هذا المستخدم');
+  if (p.id === me.id) return toast('لا يمكنك مراسلة نفسك');
+  const existing = chats.find((c) => c.kind === 'direct' && c.members.includes(p.id));
+  $('newChatSheet').hidden = true;
+  if (existing) return openChat(existing);
+  const { data: cid, error } = await sb.rpc('create_chat', {
+    p_kind: 'direct', p_name: null, p_members: [p.id],
+  });
+  if (error) return toast('تعذّر فتح المحادثة');
+  await loadChats();
+  const c = chats.find((x) => x.id === cid);
+  if (c) openChat(c);
+});
+
+$('newGroupBtn').addEventListener('click', () => {
+  $('gName').value = '';
+  $('gUsers').value = '';
+  $('groupSheet').hidden = false;
+});
+$('gCancel').addEventListener('click', () => { $('groupSheet').hidden = true; });
+$('gGo').addEventListener('click', async () => {
+  const name = $('gName').value.trim();
+  const names = $('gUsers').value.split(/[,\s،]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (!name) return toast('أدخل اسم المجموعة');
+  if (!names.length) return toast('أدخل اسم مستخدم عضو واحد على الأقل');
+  const { data: ps } = await sb.from('profiles').select('id, username').in('username', names);
+  const ids = (ps || []).map((p) => p.id).filter((id) => id !== me.id);
+  if (!ids.length) return toast('لم نجد الأعضاء');
+  const { data: cid, error } = await sb.rpc('create_chat', {
+    p_kind: 'group', p_name: name, p_members: ids,
+  });
+  if (error) return toast('تعذّر إنشاء المجموعة');
+  $('groupSheet').hidden = true;
+  await loadChats();
+  const c = chats.find((x) => x.id === cid);
+  if (c) openChat(c);
+});
+
+function paintPic() { setAvatar($('picImg'), profile.photo, initial(profile)); }
+
+function openProfile() {
+  $('pName').value = profile.name || '';
+  $('pUser').value = profile.username || '';
+  $('pBio').value = profile.bio || '';
+  $('pBirth').value = profile.birth || '';
+  $('pCity').value = profile.city || '';
+  $('pEmail').value = profile.email || '';
+  $('pPhone').value = profile.phone || '';
+  $('pLink').value = profile.link || '';
+  $('pPass').value = '';
+  paintPic();
+  $('profile').hidden = false;
+}
+$('pClose').addEventListener('click', () => { $('profile').hidden = true; });
+
+$('picFile').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  readFile(f, (src) => {
+    const im = new Image();
+    im.onload = async () => {
+      try {
+        const side = Math.min(im.width, im.height);
+        const c = document.createElement('canvas');
+        c.width = c.height = 256;
+        c.getContext('2d').drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, 256, 256);
+        const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85));
+        const photo = await uploadMedia(blob, 'jpg');
+        const { error } = await sb.from('profiles').update({ photo }).eq('id', me.id);
+        if (error) return toast('تعذّر حفظ الصورة');
+        profile.photo = photo;
+        people[me.id] = profile;
+        paintPic();
+        renderList();
+        toast('تم تحديث الصورة');
+      } catch (err) {
+        toast('تعذّر رفع الصورة');
+      }
+    };
+    im.src = src;
+  });
+});
+
+$('pSave').addEventListener('click', async () => {
+  const patch = {
+    name: $('pName').value.trim(),
+    bio: $('pBio').value.trim(),
+    birth: $('pBirth').value || null,
+    city: $('pCity').value.trim(),
+    link: $('pLink').value.trim(),
+    email: $('pEmail').value.trim() || null,
+    phone: $('pPhone').value.trim() || null,
+  };
+  const { error } = await sb.from('profiles').update(patch).eq('id', me.id);
+  if (error) return toast('تعذّر الحفظ');
+  Object.assign(profile, patch);
+  people[me.id] = profile;
+  const np = $('pPass').value;
+  if (np) {
+    if (np.length < 8) return toast('كلمة المرور 8 أحرف على الأقل');
+    const { error: e2 } = await sb.auth.updateUser({ password: np });
+    if (e2) return toast('تعذّر تغيير كلمة المرور');
+    $('pPass').value = '';
+  }
+  renderList();
+  toast('تم الحفظ');
+});
+
+$('pLogout').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+applyTheme();
+syncSettings();
+
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await enterApp();
+  else showView('loginForm');
+})();
+
+(() => {
+  let deferred = null;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; });
+  window.addEventListener('appinstalled', () => { deferred = null; toast('تم تثبيت LMLM على جهازك'); });
+
+  document.querySelectorAll('[data-install]').forEach((b) => b.addEventListener('click', async () => {
+    if (isStandalone) return toast('التطبيق مثبَّت بالفعل');
+    if (deferred) {
+      deferred.prompt();
+      await deferred.userChoice;
+      deferred = null;
+      return;
+    }
+    if (isIOS) return toast('على iPhone: اضغط زر المشاركة ثم اختر "إضافة إلى الشاشة الرئيسية"');
+    toast('من قائمة المتصفح ⋮ اختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية"');
+  }));
+
+  document.querySelectorAll('[data-share]').forEach((b) => b.addEventListener('click', async () => {
+    const data = {
+      title: 'LMLM',
+      text: 'انضم إلى LMLM',
+      url: location.origin + location.pathname,
+    };
+    if (navigator.share) {
+      try { await navigator.share(data); } catch (e) {}
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(data.url);
+      toast('تم نسخ رابط التطبيق');
+    } catch (e) { toast(data.url); }
+  }));
+})();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+window.addEventListener('error', (e) => {
+  const b = $('bootErr');
+  b.hidden = false;
+  b.textContent = 'خطأ: ' + (e.message || e);
+});
+
+setTimeout(() => {
+  if (!window.__lmlmReady && $('app').hidden && $('auth').hidden) {
+    const b = $('bootErr');
+    b.hidden = false;
+    b.textContent = 'لم يكتمل تحميل التطبيق. تحقق من الاتصال بالإنترنت ثم أعد فتح الصفحة.';
+  }
+}, 6000);
+
+window.__lmlmReady = true;
+</script>
+</body>
+  </html>

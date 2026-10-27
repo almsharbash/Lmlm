@@ -1,15 +1,37 @@
 {
-  "name": "LMLM",
+  "name": "LMLM — منصة التواصل",
   "short_name": "LMLM",
+  "description": "منصة تواصل ومراسلة عربية سريعة وآمنة",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
+  "id": "/Lmlm/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#EEF5FC",
   "theme_color": "#1E9BF0",
+  "categories": ["social", "communication"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "محادثاتي",
+      "short_name": "محادثات",
+      "url": "./?view=chats",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }

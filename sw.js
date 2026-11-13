@@ -1,18 +1,21 @@
-/* LMLM Service Worker v2
+/* LMLM Service Worker v3
  * استراتيجية:
  *   - HTML/JS/CSS → Network-first (دائماً أحدث نسخة)
  *   - صور/manifest → Cache-first (أسرع)
  *   - Supabase API → بدون تدخل (بيانات حية)
  */
 
-const VERSION = 'lmlm-v2';
+const VERSION = 'lmlm-v3';
 
 const STATIC = [
   './',
   './index.html',
+  './legal.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './apple-touch-icon.png',
+  './favicon-32.png'
 ];
 
 /* ---------- Install ---------- */

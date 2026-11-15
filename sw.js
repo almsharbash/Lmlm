@@ -1,15 +1,21 @@
-/* LMLM Service Worker v3
+/* LMLM Service Worker v4
  * استراتيجية:
- *   - HTML/JS/CSS → Network-first (دائماً أحدث نسخة)
- *   - صور/manifest → Cache-first (أسرع)
- *   - Supabase API → بدون تدخل (بيانات حية)
+ *   - HTML/JS/CSS → Network-first (دائماً أحدث نسخة) مع كاش احتياطي
+ *   - صور/manifest → Cache-first
+ *   - مكتبات CDN المثبّتة بإصدار → Cache-first (تعمل دون اتصال بعد أول تحميل)
+ *   - صور Supabase Storage → Cache-first (تظهر دون اتصال، بحد أقصى 150 صورة)
+ *   - باقي Supabase API → بدون تدخل (بيانات حية)
+ * لا يُخزَّن في الكاش إلا الردود الناجحة (200) كي لا تُحفظ أخطاء 404/500.
  */
 
-const VERSION = 'lmlm-v3';
+const VERSION = 'lmlm-v5';
+const MEDIA = 'lmlm-media-v1';
+const MEDIA_MAX = 150;
 
 const STATIC = [
   './',
   './index.html',
+  './app.js',
   './legal.html',
   './manifest.json',
   './icon-192.png',
@@ -18,11 +24,14 @@ const STATIC = [
   './favicon-32.png'
 ];
 
+const CDN_HOSTS = ['cdn.jsdelivr.net', 'esm.sh'];
+
 /* ---------- Install ---------- */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(VERSION)
-      .then((cache) => cache.addAll(STATIC).catch(() => {}))
+      // نضيف كل ملف على حدة كي لا يُفشل ملفٌ مفقود تخزين الباقي
+      .then((cache) => Promise.all(STATIC.map((u) => cache.add(u).catch(() => {}))))
       .then(() => self.skipWaiting())
   );
 });
@@ -31,39 +40,63 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) =>
-        Promise.all(
-          keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))
-        )
-      )
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== MEDIA).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
+function put(req, res) {
+  if (res && res.ok && res.status === 200) {
+    const clone = res.clone();
+    caches.open(VERSION).then((c) => c.put(req, clone)).catch(() => {});
+  }
+  return res;
+}
+
 /* ---------- Fetch ---------- */
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-
-  // لا نتدخل في غير GET
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
 
-  // لا نتدخل في طلبات Supabase أو أي API خارجي
-  if (url.hostname.includes('supabase.co')) return;
-  if (url.hostname.includes('jsdelivr.net')) return;
+  // صور التخزين العامة (أسماؤها UUID ثابتة): كاش أولاً ثم الشبكة
+  if (url.hostname.endsWith('supabase.co') && url.pathname.includes('/storage/v1/object/public/') && req.destination === 'image') {
+    event.respondWith(
+      caches.open(MEDIA).then((cache) =>
+        cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+          if (res && res.ok && res.status === 200) {
+            cache.put(req, res.clone()).then(() => cache.keys()).then((keys) => {
+              if (keys.length > MEDIA_MAX) cache.delete(keys[0]);
+            }).catch(() => {});
+          }
+          return res;
+        })))
+    );
+    return;
+  }
 
-  // HTML / JS / CSS / Fonts → Network-first
-  if (['document', 'script', 'style', 'font'].includes(req.destination)) {
+  // بقية بيانات Supabase حيّة: لا نتدخل أبداً
+  if (url.hostname.endsWith('supabase.co')) return;
+
+  // مكتبات CDN (مثبّتة بإصدار): كاش أولاً ثم الشبكة
+  if (CDN_HOSTS.includes(url.hostname)) {
+    event.respondWith(
+      caches.match(req).then((cached) => cached || fetch(req).then((res) => put(req, res)))
+    );
+    return;
+  }
+
+  // لا نتدخل في أي نطاق خارجي آخر (خطوط Google تُترك للمتصفح)
+  if (url.origin !== self.location.origin) return;
+
+  // HTML / JS / CSS → Network-first
+  if (req.mode === 'navigate' || ['document', 'script', 'style', 'font'].includes(req.destination)) {
     event.respondWith(
       fetch(req)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(VERSION).then((cache) => cache.put(req, clone)).catch(() => {});
-          return res;
-        })
+        .then((res) => put(req, res))
         .catch(() =>
-          caches.match(req).then((cached) => cached || caches.match('./index.html'))
+          caches.match(req, { ignoreSearch: true }).then((cached) => cached || caches.match('./index.html'))
         )
     );
     return;
@@ -72,22 +105,11 @@ self.addEventListener('fetch', (event) => {
   // صور / manifest → Cache-first
   if (['image', 'manifest'].includes(req.destination)) {
     event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req)
-          .then((res) => {
-            const clone = res.clone();
-            caches.open(VERSION).then((cache) => cache.put(req, clone)).catch(() => {});
-            return res;
-          })
-          .catch(() => cached);
-      })
+      caches.match(req).then((cached) => cached || fetch(req).then((res) => put(req, res)))
     );
     return;
   }
 
-  // الباقي: نجرّب الشبكة، ونستخدم الكاش كاحتياط
-  event.respondWith(
-    fetch(req).catch(() => caches.match(req))
-  );
+  // الباقي: الشبكة ثم الكاش
+  event.respondWith(fetch(req).catch(() => caches.match(req)));
 });

@@ -3,15 +3,19 @@
  *   - HTML/JS/CSS → Network-first (دائماً أحدث نسخة) مع كاش احتياطي
  *   - صور/manifest → Cache-first
  *   - مكتبات CDN المثبّتة بإصدار → Cache-first (تعمل دون اتصال بعد أول تحميل)
- *   - Supabase API → بدون تدخل (بيانات حية)
+ *   - صور Supabase Storage → Cache-first (تظهر دون اتصال، بحد أقصى 150 صورة)
+ *   - باقي Supabase API → بدون تدخل (بيانات حية)
  * لا يُخزَّن في الكاش إلا الردود الناجحة (200) كي لا تُحفظ أخطاء 404/500.
  */
 
-const VERSION = 'lmlm-v4';
+const VERSION = 'lmlm-v5';
+const MEDIA = 'lmlm-media-v1';
+const MEDIA_MAX = 150;
 
 const STATIC = [
   './',
   './index.html',
+  './app.js',
   './legal.html',
   './manifest.json',
   './icon-192.png',
@@ -36,7 +40,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== MEDIA).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -56,7 +60,23 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // بيانات Supabase حيّة: لا نتدخل أبداً
+  // صور التخزين العامة (أسماؤها UUID ثابتة): كاش أولاً ثم الشبكة
+  if (url.hostname.endsWith('supabase.co') && url.pathname.includes('/storage/v1/object/public/') && req.destination === 'image') {
+    event.respondWith(
+      caches.open(MEDIA).then((cache) =>
+        cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+          if (res && res.ok && res.status === 200) {
+            cache.put(req, res.clone()).then(() => cache.keys()).then((keys) => {
+              if (keys.length > MEDIA_MAX) cache.delete(keys[0]);
+            }).catch(() => {});
+          }
+          return res;
+        })))
+    );
+    return;
+  }
+
+  // بقية بيانات Supabase حيّة: لا نتدخل أبداً
   if (url.hostname.endsWith('supabase.co')) return;
 
   // مكتبات CDN (مثبّتة بإصدار): كاش أولاً ثم الشبكة

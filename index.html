@@ -23,13 +23,19 @@ button{cursor:pointer;border:0;background:none}
 .top h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.5px}
 .wrap{max-width:480px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
 
+#boot{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#EAF5FF,#D8E8FB)}
+#boot .card{align-items:center;text-align:center}
+.spin.dark{border-color:rgba(30,155,240,.25);border-top-color:var(--acc);width:26px;height:26px;margin:0}
+
 #auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#EAF5FF,#D8E8FB)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 22px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:400px;box-shadow:0 12px 32px rgba(14,58,140,.12)}
 .logo{width:72px;height:72px;border-radius:20px;margin:0 auto 4px;background:linear-gradient(135deg,var(--acc),var(--deep));color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;letter-spacing:.5px}
 h2{margin:0;text-align:center;font-size:20px}
 .sub{margin:-6px 0 0;text-align:center;color:var(--muted);font-size:14px}
-.inp{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#F6F9FD;font-size:15px;outline:none}
+.inp{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#F6F9FD;font-size:16px;outline:none}
 .inp:focus{border-color:var(--acc);background:#fff;box-shadow:0 0 0 3px rgba(30,155,240,.15)}
+.ltr{direction:ltr}
+.ltr:placeholder-shown{direction:rtl}
 .pw{position:relative}
 .pw .inp{padding-inline-end:46px}
 .pw button{position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;font-size:17px;opacity:.6}
@@ -38,9 +44,10 @@ h2{margin:0;text-align:center;font-size:20px}
 .btn.ghost{background:none;color:var(--acc);border:1px solid var(--line);box-shadow:none}
 .btn.danger{background:none;color:var(--danger);border:1px solid #F5C6C6;box-shadow:none}
 .lnk{color:var(--acc);font-weight:600;padding:6px;width:100%;text-align:center}
-.err{color:var(--danger);font-size:13.5px;margin:0;text-align:center;font-weight:600}
+.err{color:var(--danger);font-size:13.5px;margin:0;text-align:center;font-weight:600;line-height:1.7}
 .hint{color:var(--muted);font-size:13px;margin:0;text-align:center;line-height:1.7}
-.code{direction:ltr;text-align:center;font-size:20px;font-weight:700;letter-spacing:2px;background:#F3F7FC;padding:14px;border-radius:12px;color:var(--acc);word-break:break-all}
+.hint a{color:var(--acc);font-weight:600}
+.code{direction:ltr;text-align:center;font-size:20px;font-weight:700;letter-spacing:2px;background:#F3F7FC;padding:14px;border-radius:12px;color:var(--acc);word-break:break-all;user-select:all}
 .check{display:flex;gap:8px;align-items:center;font-size:14px}
 .field{display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--muted)}
 .field .inp{color:var(--text)}
@@ -53,7 +60,7 @@ h2{margin:0;text-align:center;font-size:20px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
 .panel h3{margin:0;font-size:15px;color:var(--deep)}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;z-index:50;max-width:90%;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;z-index:50;max-width:90%;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 .toast.error{background:var(--danger)}
 .toast.success{background:var(--ok)}
 .spin{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-inline-start:6px}
@@ -62,19 +69,29 @@ h2{margin:0;text-align:center;font-size:20px}
 </head>
 <body>
 
+<!-- ================= BOOT (يظهر دائماً حتى لا تبقى الشاشة بيضاء) ================= -->
+<div id="boot">
+  <div class="card">
+    <div class="logo">LMLM</div>
+    <span class="spin dark" id="bootSpin"></span>
+    <p class="hint" id="bootMsg">جارٍ التحميل…</p>
+    <button class="btn" id="bootRetry" type="button" hidden>إعادة المحاولة</button>
+  </div>
+</div>
+
 <!-- ================= AUTH ================= -->
 <div id="auth" hidden>
 
-  <form class="card" id="vLogin" hidden>
+  <form class="card" id="vLogin" hidden novalidate>
     <div class="logo">LMLM</div>
     <h2>مرحباً بعودتك</h2>
     <p class="sub">سجّل دخولك للمتابعة</p>
-    <input class="inp" id="lId" placeholder="اسم المستخدم أو البريد" autocomplete="username">
+    <input class="inp ltr" id="lId" placeholder="اسم المستخدم أو البريد الإلكتروني" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="اسم المستخدم أو البريد الإلكتروني">
     <div class="pw">
-      <input class="inp" id="lPass" type="password" placeholder="كلمة المرور" autocomplete="current-password">
-      <button type="button" data-toggle="lPass" aria-label="إظهار">👁️</button>
+      <input class="inp ltr" id="lPass" type="password" placeholder="كلمة المرور" autocomplete="current-password" aria-label="كلمة المرور">
+      <button type="button" data-toggle="lPass" aria-label="إظهار أو إخفاء كلمة المرور">👁️</button>
     </div>
-    <p class="err" id="lErr" hidden></p>
+    <p class="err" id="lErr" role="alert" hidden></p>
     <button class="btn" id="lBtn" type="submit">دخول</button>
     <button class="lnk" type="button" data-go="vChoose">إنشاء حساب جديد</button>
   </form>
@@ -86,40 +103,42 @@ h2{margin:0;text-align:center;font-size:20px}
     <button class="btn" type="button" data-go="vInstant">🚀 حساب فوري (كلمة مرور تلقائية)</button>
     <button class="btn ghost" type="button" data-go="vEmail">✉️ بالبريد الإلكتروني ورمز تحقق</button>
     <button class="lnk" type="button" data-go="vLogin">لدي حساب بالفعل</button>
+    <p class="hint">بإنشاء حساب فأنت توافق على <a href="legal.html" target="_blank" rel="noopener">الشروط والخصوصية</a>.</p>
   </div>
 
-  <form class="card" id="vInstant" hidden>
+  <form class="card" id="vInstant" hidden novalidate>
     <div class="logo">LMLM</div>
     <h2>حساب فوري</h2>
     <p class="hint">ستُنشأ لك كلمة مرور عشوائية تظهر مرة واحدة فقط. احفظها في مكان آمن.</p>
-    <input class="inp" id="iUser" placeholder="اسم المستخدم (إنجليزية أو أرقام)" maxlength="20" autocomplete="username">
-    <p class="err" id="iErr" hidden></p>
+    <input class="inp ltr" id="iUser" placeholder="اسم المستخدم (إنجليزية أو أرقام)" maxlength="20" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="اسم المستخدم">
+    <p class="err" id="iErr" role="alert" hidden></p>
     <button class="btn" id="iBtn" type="submit">إنشاء الحساب</button>
     <button class="lnk" type="button" data-go="vChoose">رجوع</button>
   </form>
 
-  <form class="card" id="vEmail" hidden>
+  <form class="card" id="vEmail" hidden novalidate>
     <div class="logo">LMLM</div>
     <h2>إنشاء حساب</h2>
-    <input class="inp" id="rUser" placeholder="اسم المستخدم (إنجليزية أو أرقام)" maxlength="20" autocomplete="username">
-    <input class="inp" id="rEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+    <input class="inp ltr" id="rUser" placeholder="اسم المستخدم (إنجليزية أو أرقام)" maxlength="20" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="اسم المستخدم">
+    <input class="inp ltr" id="rEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="البريد الإلكتروني">
     <div class="pw">
-      <input class="inp" id="rPass" type="password" placeholder="كلمة المرور (8 أحرف على الأقل)" autocomplete="new-password">
-      <button type="button" data-toggle="rPass" aria-label="إظهار">👁️</button>
+      <input class="inp ltr" id="rPass" type="password" placeholder="كلمة المرور (8 أحرف على الأقل)" autocomplete="new-password" aria-label="كلمة المرور">
+      <button type="button" data-toggle="rPass" aria-label="إظهار أو إخفاء كلمة المرور">👁️</button>
     </div>
-    <p class="err" id="rErr" hidden></p>
+    <p class="err" id="rErr" role="alert" hidden></p>
     <button class="btn" id="rBtn" type="submit">إرسال رمز التحقق</button>
     <button class="lnk" type="button" data-go="vChoose">رجوع</button>
   </form>
 
-  <form class="card" id="vVerify" hidden>
+  <form class="card" id="vVerify" hidden novalidate>
     <div class="logo">✉️</div>
     <h2>أدخل رمز التحقق</h2>
     <p class="sub">أرسلناه إلى <b id="vTo" style="color:var(--acc)"></b></p>
-    <input class="inp" id="vCode" inputmode="numeric" maxlength="8" placeholder="------" autocomplete="one-time-code" style="text-align:center;font-size:20px;letter-spacing:6px">
-    <p class="err" id="vErr" hidden></p>
+    <input class="inp" id="vCode" inputmode="numeric" maxlength="10" placeholder="------" autocomplete="one-time-code" style="text-align:center;font-size:20px;letter-spacing:6px;direction:ltr" aria-label="رمز التحقق">
+    <p class="err" id="vErr" role="alert" hidden></p>
     <button class="btn" id="vBtn" type="submit">تأكيد</button>
-    <button class="btn ghost" id="rsBtn" type="button">إعادة الإرسال (<span id="rcd">60</span>)</button>
+    <button class="btn ghost" id="rsBtn" type="button">إعادة الإرسال</button>
+    <button class="lnk" type="button" data-go="vLogin">رجوع لتسجيل الدخول</button>
   </form>
 
   <div class="card" id="vGen" hidden>
@@ -128,6 +147,7 @@ h2{margin:0;text-align:center;font-size:20px}
     <p class="sub">احفظها الآن، لن تُعرض مرة أخرى</p>
     <code class="code" id="genPass"></code>
     <button class="btn ghost" id="genCopy" type="button">📋 نسخ</button>
+    <button class="btn ghost" id="genDl" type="button">💾 حفظ كملف نصي</button>
     <label class="check"><input type="checkbox" id="genSaved"> حفظتها في مكان آمن</label>
     <button class="btn" id="genDone" type="button" disabled>متابعة للدخول</button>
   </div>
@@ -147,26 +167,26 @@ h2{margin:0;text-align:center;font-size:20px}
       <p class="username" id="hUser"></p>
     </section>
 
-    <form class="panel" id="pForm">
+    <form class="panel" id="pForm" novalidate>
       <h3>المعلومات الشخصية</h3>
-      <div class="field">الاسم<input class="inp" id="pName" maxlength="40"></div>
-      <div class="field">اسم المستخدم (ثابت)<input class="inp" id="pUser" readonly></div>
-      <div class="field">النبذة<textarea class="inp" id="pBio" maxlength="160" rows="2"></textarea></div>
-      <div class="field">المدينة<input class="inp" id="pCity" maxlength="40"></div>
-      <div class="field">تاريخ الميلاد<input class="inp" type="date" id="pBirth"></div>
-      <div class="field">الرابط<input class="inp" id="pLink" type="url" maxlength="300"></div>
+      <label class="field">الاسم<input class="inp" id="pName" maxlength="40"></label>
+      <label class="field">اسم المستخدم (ثابت)<input class="inp ltr" id="pUser" readonly></label>
+      <label class="field">النبذة<textarea class="inp" id="pBio" maxlength="160" rows="2"></textarea></label>
+      <label class="field">المدينة<input class="inp" id="pCity" maxlength="40"></label>
+      <label class="field">تاريخ الميلاد<input class="inp" type="date" id="pBirth" min="1900-01-01"></label>
+      <label class="field">الرابط<input class="inp ltr" id="pLink" type="url" maxlength="300" placeholder="https://" autocapitalize="none"></label>
 
       <h3>بيانات الاتصال (خاصة، لا يراها غيرك)</h3>
-      <div class="field">البريد الإلكتروني<input class="inp" id="pEmail" type="email"></div>
-      <div class="field">رقم الهاتف<input class="inp" id="pPhone" type="tel" placeholder="مثال: +963912345678"></div>
+      <label class="field">البريد الإلكتروني<input class="inp ltr" id="pEmail" type="email" autocapitalize="none"></label>
+      <label class="field">رقم الهاتف<input class="inp ltr" id="pPhone" type="tel" placeholder="مثال: +963912345678"></label>
 
       <h3>تغيير كلمة المرور</h3>
       <div class="pw">
-        <input class="inp" id="pPass" type="password" placeholder="كلمة مرور جديدة (اختياري)" autocomplete="new-password">
-        <button type="button" data-toggle="pPass" aria-label="إظهار">👁️</button>
+        <input class="inp ltr" id="pPass" type="password" placeholder="كلمة مرور جديدة (اختياري)" autocomplete="new-password" aria-label="كلمة مرور جديدة">
+        <button type="button" data-toggle="pPass" aria-label="إظهار أو إخفاء كلمة المرور">👁️</button>
       </div>
 
-      <p class="err" id="pErr" hidden></p>
+      <p class="err" id="pErr" role="alert" hidden></p>
       <button class="btn" id="pBtn" type="submit">حفظ التغييرات</button>
     </form>
 
@@ -175,27 +195,35 @@ h2{margin:0;text-align:center;font-size:20px}
 </div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
-
+/* ================= الإعدادات ================= */
 const SUPA_URL = 'https://srvjzrrlkdyrywkhbzdi.supabase.co';
 const SUPA_KEY = 'sb_publishable_1iTsxT3RzrKNY04jzxKNvQ_mGvIPxDo';
-const FN = 'clever-processor';
-const RIM = 'lmlm.local';
+const FN = 'clever-processor';          // دالة إنشاء الحساب الفوري
+const RIM = 'lmlm.local';               // نطاق البريد الداخلي للحسابات الفورية
 const USER_RE = /^[A-Za-z0-9_]{3,20}$/;
-const sb = createClient(SUPA_URL, SUPA_KEY);
-const $ = (id) => document.getElementById(id);
+const LIB_URLS = [                      // مصادر احتياطية للمكتبة
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm',
+  'https://esm.sh/@supabase/supabase-js@2.45.4'
+];
 
+const $ = (id) => document.getElementById(id);
+let sb = null;
 let me = null;
 let profile = {};
 let pending = null;
 let timer = null;
+let entering = false;
 
-/* ---------- helpers ---------- */
+/* ================= أدوات عامة ================= */
 const AUTH_VIEWS = ['vLogin', 'vChoose', 'vInstant', 'vEmail', 'vVerify', 'vGen'];
 function showAuth(view) {
+  $('boot').hidden = true;
   $('app').hidden = true;
   $('auth').hidden = false;
   AUTH_VIEWS.forEach((v) => ($(v).hidden = v !== view));
+  window.onbeforeunload = view === 'vGen' ? (e) => { e.preventDefault(); e.returnValue = ''; } : null;
+  const first = $(view).querySelector('input:not([type=checkbox])');
+  if (first && matchMedia('(pointer:fine)').matches) first.focus();
 }
 function setErr(id, msg) { const el = $(id); el.textContent = msg || ''; el.hidden = !msg; }
 function toast(msg, type = '', ms = 2800) {
@@ -207,18 +235,25 @@ function toast(msg, type = '', ms = 2800) {
 }
 function busy(btn, on, label) {
   if (on) {
-    btn.dataset.o = btn.innerHTML;
+    if (!btn.dataset.o) btn.dataset.o = btn.innerHTML;
     btn.innerHTML = label + ' <span class="spin"></span>';
     btn.disabled = true;
   } else {
     btn.innerHTML = btn.dataset.o || label;
+    delete btn.dataset.o;
     btn.disabled = false;
   }
 }
-function normPhone(s) { return (s || '').replace(/[^\d+]/g, ''); }
+const arDigits = (s) => (s || '')
+  .replace(/[\u0660-\u0669]/g, (d) => d.charCodeAt(0) - 0x660)
+  .replace(/[\u06F0-\u06F9]/g, (d) => d.charCodeAt(0) - 0x6F0);
+const cleanUser = (s) => arDigits(s).trim().replace(/^@/, '').toLowerCase();
+const normPhone = (s) => arDigits(s).replace(/[^\d+]/g, '');
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function setAvatar(photo, label) {
   const el = $('avatar');
-  el.style.backgroundImage = photo ? `url(${photo})` : '';
+  el.style.backgroundImage = photo ? `url("${String(photo).replace(/["\\()\s]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'))}")` : '';
   el.textContent = photo ? '' : (label || '?').charAt(0);
 }
 function genPassword() {
@@ -226,62 +261,134 @@ function genPassword() {
   const arr = (pick(7, 'abcdefghjkmnpqrstuvwxyz') + pick(2, 'ABCDEFGHJKMNPQRSTUVWXYZ') + pick(2, '23456789') + pick(1, '!@#$%&*')).split('');
   const r = new Uint32Array(arr.length); crypto.getRandomValues(r);
   for (let i = arr.length - 1; i > 0; i--) { const j = r[i] % (i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
-  return 'rim' + arr.join('');
+  return 'lm' + arr.join('');
 }
 function startCountdown() {
   let s = 60;
-  const b = $('rsBtn'), c = $('rcd');
-  b.disabled = true; c.textContent = s;
+  const b = $('rsBtn');
+  const paint = () => { b.textContent = s > 0 ? `إعادة الإرسال (${s})` : 'إعادة إرسال الرمز'; };
+  b.disabled = true; paint();
   clearInterval(timer);
   timer = setInterval(() => {
-    s--; c.textContent = s;
+    s--; paint();
     if (s <= 0) { clearInterval(timer); b.disabled = false; }
   }, 1000);
 }
 
-/* ---------- navigation ---------- */
-document.querySelectorAll('[data-go]').forEach((b) => b.onclick = () => showAuth(b.dataset.go));
+/* تحويل أخطاء Supabase إلى رسائل عربية مفهومة */
+function authMsg(error) {
+  const m = String((error && error.message) || '').toLowerCase();
+  const st = error && error.status;
+  if (!navigator.onLine || /failed to fetch|networkerror|network request|load failed/.test(m) || (error && error.name === 'AuthRetryableFetchError'))
+    return 'تعذّر الاتصال بالخادم. تحقق من الإنترنت وأعد المحاولة';
+  if (/invalid login|invalid credentials/.test(m)) return 'اسم المستخدم أو كلمة المرور غير صحيحة';
+  if (/not confirmed/.test(m)) return 'البريد غير مؤكَّد بعد';
+  if (st === 429 || /rate limit|too many|security purposes/.test(m)) return 'محاولات كثيرة. انتظر دقيقة ثم أعد المحاولة';
+  if (/already registered|already been registered|already exists/.test(m)) return 'هذا البريد مسجّل مسبقاً. سجّل الدخول بدلاً من ذلك';
+  if (/same password|different from the old/.test(m)) return 'كلمة المرور الجديدة يجب أن تختلف عن الحالية';
+  if (/password/.test(m) && /(least|short|weak|characters)/.test(m)) return 'كلمة المرور ضعيفة أو قصيرة';
+  if (/email/.test(m) && /(invalid|valid)/.test(m)) return 'بريد إلكتروني غير صالح';
+  if (/signups? not allowed|signup.*disabled/.test(m)) return 'إنشاء الحسابات متوقف حالياً';
+  if (/token.*(expired|invalid)|otp/.test(m)) return 'الرمز غير صحيح أو منتهٍ. اضغط إعادة الإرسال';
+  if (/sending|smtp|confirmation email|error sending/.test(m)) return 'تعذّر إرسال البريد حالياً. حاول لاحقاً';
+  console.error('[auth]', error);
+  return 'حدث خطأ غير متوقع' + (error && error.message ? ' (' + error.message + ')' : '');
+}
+
+/* خطأ دالة الحساب الفوري (Edge Function) */
+async function fnMsg(error, data) {
+  let body = data && typeof data === 'object' ? data : null;
+  let status = error && error.context && error.context.status;
+  if (error && error.context && typeof error.context.text === 'function') {
+    try { const t = await error.context.text(); try { body = JSON.parse(t); } catch { body = { error: t }; } } catch {}
+  }
+  const raw = String((body && (body.error || body.message)) || (error && error.message) || '');
+  console.error('[instant-account]', status, raw, error);
+  if (!navigator.onLine) return 'تعذّر الاتصال بالإنترنت';
+  if (status === 409 || /taken|already|exists|مستخدم|محجوز/i.test(raw)) return 'اسم المستخدم محجوز، اختر اسماً آخر';
+  if (status === 400 && /invalid username/i.test(raw)) return 'اسم المستخدم غير صالح';
+  if (status === 429) return 'محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة';
+  if (status === 401 || status === 403) return `الخدمة رفضت الطلب (${status}). ربما يلزم تعطيل Verify JWT للدالة. جرّب التسجيل بالبريد`;
+  if (status === 404 || /failed to send a request|relay error|not found/i.test(raw)) return 'خدمة الحساب الفوري غير متاحة حالياً. جرّب التسجيل بالبريد الإلكتروني';
+  return 'تعذّر إنشاء الحساب' + (status ? ` (${status})` : '') + '. حاول مجدداً أو سجّل بالبريد';
+}
+
+/* هل اسم المستخدم متاح؟ true / false / null (غير معروف) */
+async function usernameFree(u) {
+  try {
+    const { data, error } = await sb.rpc('username_available', { u });
+    if (!error && typeof data === 'boolean') return data;
+  } catch {}
+  try {
+    const { data, error } = await sb.from('profiles').select('id').eq('username', u).maybeSingle();
+    if (!error && data) return false;
+  } catch {}
+  return null;
+}
+
+/* ================= التنقّل ================= */
+document.querySelectorAll('[data-go]').forEach((b) => b.onclick = () => {
+  ['lErr', 'iErr', 'rErr', 'vErr'].forEach((id) => setErr(id, ''));
+  showAuth(b.dataset.go);
+});
 document.querySelectorAll('[data-toggle]').forEach((b) => b.onclick = () => {
   const i = $(b.dataset.toggle);
   i.type = i.type === 'password' ? 'text' : 'password';
 });
+window.addEventListener('offline', () => toast('لا يوجد اتصال بالإنترنت', 'error', 3500));
+window.addEventListener('online', () => toast('عاد الاتصال', 'success'));
 
-/* ---------- login ---------- */
+/* ================= تسجيل الدخول ================= */
 $('vLogin').onsubmit = async (e) => {
   e.preventDefault();
   setErr('lErr', '');
-  const id = $('lId').value.trim().toLowerCase();
+  const raw = $('lId').value.trim();
   const pw = $('lPass').value;
-  if (!id || !pw) return setErr('lErr', 'أدخل المعرف وكلمة المرور');
+  if (!raw || !pw) return setErr('lErr', 'أدخل المعرّف وكلمة المرور');
+  const id = raw.includes('@') ? raw.toLowerCase() : cleanUser(raw);
   const email = id.includes('@') ? id : `${id}@${RIM}`;
   busy($('lBtn'), true, 'جارٍ الدخول');
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  let error;
+  try { ({ error } = await sb.auth.signInWithPassword({ email, password: pw })); }
+  catch (x) { error = x; }
   busy($('lBtn'), false, 'دخول');
-  if (error) return setErr('lErr', 'بيانات الدخول غير صحيحة');
+  if (error) {
+    if (/not confirmed/i.test(error.message || '')) {
+      // حساب بريد لم يُؤكَّد: ننقله لشاشة الرمز مع إعادة إرسال
+      pending = { kind: 'mail', u: null, email };
+      $('vTo').textContent = email;
+      $('vCode').value = '';
+      showAuth('vVerify');
+      try { await sb.auth.resend({ type: 'signup', email }); startCountdown(); toast('أرسلنا رمز تحقق جديداً', 'success'); }
+      catch { startCountdown(); }
+      return;
+    }
+    return setErr('lErr', authMsg(error));
+  }
   $('lPass').value = '';
   await enterApp();
 };
 
-/* ---------- instant account ---------- */
+/* ================= حساب فوري ================= */
 $('vInstant').onsubmit = async (e) => {
   e.preventDefault();
   setErr('iErr', '');
-  const u = $('iUser').value.trim().toLowerCase();
-  if (!USER_RE.test(u)) return setErr('iErr', 'المعرف من 3 إلى 20 حرفاً إنجليزياً أو أرقاماً أو _');
-  const pw = genPassword();
+  const u = cleanUser($('iUser').value);
+  if (!USER_RE.test(u)) return setErr('iErr', 'المعرّف من 3 إلى 20 حرفاً إنجليزياً أو أرقاماً أو _');
   busy($('iBtn'), true, 'جارٍ الإنشاء');
-  let res;
-  try { res = await sb.functions.invoke(FN, { body: { username: u, password: pw } }); }
-  catch (err) { res = { error: err }; }
-  busy($('iBtn'), false, 'إنشاء الحساب');
-  const { data, error } = res;
-  if (error || (data && data.error)) {
-    let why = (data && data.error) || (error && error.message) || 'سبب غير معروف';
-    try { if (error && error.context && typeof error.context.text === 'function') why = (await error.context.text()) || why; } catch {}
-    return setErr('iErr', 'تعذّر الإنشاء: ' + why);
+  try {
+    if ((await usernameFree(u)) === false) return setErr('iErr', 'اسم المستخدم محجوز، اختر اسماً آخر');
+    const pw = genPassword();
+    let res;
+    try { res = await sb.functions.invoke(FN, { body: { username: u, password: pw } }); }
+    catch (err) { res = { error: err }; }
+    const { data, error } = res;
+    if (error || (data && data.error)) return setErr('iErr', await fnMsg(error, data));
+    pending = { kind: 'rim', u, pw };
+    showGenerated(pw);
+  } finally {
+    busy($('iBtn'), false, 'إنشاء الحساب');
   }
-  pending = { kind: 'rim', u, pw };
-  showGenerated(pw);
 };
 
 function showGenerated(pw) {
@@ -293,86 +400,147 @@ function showGenerated(pw) {
 $('genSaved').onchange = (e) => ($('genDone').disabled = !e.target.checked);
 $('genCopy').onclick = async () => {
   try { await navigator.clipboard.writeText($('genPass').textContent); toast('تم النسخ', 'success'); }
-  catch { toast('تعذّر النسخ', 'error'); }
+  catch { toast('تعذّر النسخ، انسخها يدوياً', 'error'); }
+};
+$('genDl').onclick = () => {
+  if (!pending || pending.kind !== 'rim') return;
+  const blob = new Blob([`LMLM\nusername: ${pending.u}\npassword: ${pending.pw}\n`], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lmlm-${pending.u}.txt`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 };
 $('genDone').onclick = async () => {
   if (!pending || pending.kind !== 'rim') return showAuth('vLogin');
   busy($('genDone'), true, 'جارٍ الدخول');
-  const { error } = await sb.auth.signInWithPassword({ email: `${pending.u}@${RIM}`, password: pending.pw });
+  let error;
+  try { ({ error } = await sb.auth.signInWithPassword({ email: `${pending.u}@${RIM}`, password: pending.pw })); }
+  catch (x) { error = x; }
   busy($('genDone'), false, 'متابعة للدخول');
+  const u = pending.u;
   pending = null;
-  if (error) { toast('تعذّر الدخول، جرّب تسجيل الدخول', 'error'); return showAuth('vLogin'); }
+  $('genPass').textContent = '';
+  if (error) { $('lId').value = u; toast('تعذّر الدخول تلقائياً، سجّل الدخول بكلمة المرور', 'error', 4500); return showAuth('vLogin'); }
   await enterApp();
 };
 
-/* ---------- email signup ---------- */
+/* ================= تسجيل بالبريد ================= */
 $('vEmail').onsubmit = async (e) => {
   e.preventDefault();
   setErr('rErr', '');
-  const u = $('rUser').value.trim().toLowerCase();
+  const u = cleanUser($('rUser').value);
   const email = $('rEmail').value.trim().toLowerCase();
   const pw = $('rPass').value;
-  if (!USER_RE.test(u)) return setErr('rErr', 'المعرف من 3 إلى 20 حرفاً إنجليزياً أو أرقاماً أو _');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('rErr', 'بريد إلكتروني غير صحيح');
+  if (!USER_RE.test(u)) return setErr('rErr', 'المعرّف من 3 إلى 20 حرفاً إنجليزياً أو أرقاماً أو _');
+  if (!EMAIL_RE.test(email)) return setErr('rErr', 'بريد إلكتروني غير صحيح');
   if (pw.length < 8) return setErr('rErr', 'كلمة المرور 8 أحرف على الأقل');
   busy($('rBtn'), true, 'جارٍ الإرسال');
-  const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { username: u } } });
-  busy($('rBtn'), false, 'إرسال رمز التحقق');
-  if (error) return setErr('rErr', error.message);
-  pending = { kind: 'mail', u, email };
-  $('vTo').textContent = email;
-  startCountdown();
-  showAuth('vVerify');
-  toast('أرسلنا الرمز إلى بريدك', 'success');
+  try {
+    if ((await usernameFree(u)) === false) return setErr('rErr', 'اسم المستخدم محجوز، اختر اسماً آخر');
+    const { data, error } = await sb.auth.signUp({ email, password: pw, options: { data: { username: u } } });
+    if (error) return setErr('rErr', authMsg(error));
+    // بريد مسجّل مسبقاً: Supabase لا يعيد خطأ بل مستخدماً بلا identities
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0)
+      return setErr('rErr', 'هذا البريد مسجّل مسبقاً. سجّل الدخول أو استخدم بريداً آخر');
+    // إذا كان تأكيد البريد معطّلاً في Supabase تأتي الجلسة مباشرة
+    if (data.session) {
+      try { await ensureProfile(u); } catch (x) { return setErr('rErr', 'تعذّر إنشاء الملف الشخصي: ' + (x.message || x)); }
+      $('rPass').value = '';
+      return enterApp();
+    }
+    pending = { kind: 'mail', u, email };
+    $('vTo').textContent = email;
+    $('vCode').value = '';
+    $('rPass').value = '';
+    startCountdown();
+    showAuth('vVerify');
+    toast('أرسلنا الرمز إلى بريدك', 'success');
+  } finally {
+    busy($('rBtn'), false, 'إرسال رمز التحقق');
+  }
 };
 
 $('rsBtn').onclick = async () => {
   if (!pending || pending.kind !== 'mail') return;
+  $('rsBtn').disabled = true;
   const { error } = await sb.auth.resend({ type: 'signup', email: pending.email });
-  if (error) return toast(error.message, 'error');
+  if (error) { $('rsBtn').disabled = false; return toast(authMsg(error), 'error', 4000); }
   toast('أُعيد إرسال الرمز', 'success');
   startCountdown();
 };
 
+$('vCode').oninput = (e) => { e.target.value = arDigits(e.target.value).replace(/\D/g, ''); };
+
 $('vVerify').onsubmit = async (e) => {
   e.preventDefault();
   setErr('vErr', '');
-  if (!pending || pending.kind !== 'mail') return showAuth('vEmail');
+  if (!pending || pending.kind !== 'mail') return showAuth('vLogin');
   const code = $('vCode').value.trim();
   if (!code) return setErr('vErr', 'أدخل الرمز');
   busy($('vBtn'), true, 'جارٍ التحقق');
-  const { error } = await sb.auth.verifyOtp({ email: pending.email, token: code, type: 'signup' });
+  let error;
+  try { ({ error } = await sb.auth.verifyOtp({ email: pending.email, token: code, type: 'signup' })); }
+  catch (x) { error = x; }
   busy($('vBtn'), false, 'تأكيد');
-  if (error) return setErr('vErr', 'الرمز غير صحيح أو منتهٍ، اضغط إعادة الإرسال');
+  if (error) return setErr('vErr', authMsg(error));
   const u = pending.u;
   pending = null;
-  try { await ensureProfile(u); }
-  catch (x) { return setErr('vErr', 'تعذّر إنشاء الملف الشخصي: ' + x.message); }
+  clearInterval(timer);
+  if (u) {
+    try { await ensureProfile(u); }
+    catch (x) { return setErr('vErr', 'تعذّر إنشاء الملف الشخصي: ' + (x.message || x)); }
+  }
   await enterApp();
 };
 
-/* ---------- session & profile ---------- */
+/* ================= الجلسة والملف الشخصي ================= */
+/* ينشئ الملف الشخصي. إذا كان الاسم محجوزاً يضيف أرقاماً بدل أن يعلق المستخدم */
 async function ensureProfile(username) {
   const { data: { user } } = await sb.auth.getUser();
-  const { error } = await sb.from('profiles').upsert({ id: user.id, username, name: username }, { onConflict: 'id' });
-  if (error) throw error;
+  if (!user) throw new Error('لا توجد جلسة');
+  let uname = username;
+  for (let i = 0; i < 5; i++) {
+    const { error } = await sb.from('profiles').upsert({ id: user.id, username: uname, name: username }, { onConflict: 'id' });
+    if (!error) {
+      if (uname !== username) toast('اسم المستخدم محجوز، أصبح اسمك @' + uname, '', 5000);
+      return uname;
+    }
+    if (error.code === '23505') { uname = username.slice(0, 16) + String(Math.floor(Math.random() * 1000)).padStart(3, '0'); continue; }
+    throw error;
+  }
+  throw new Error('تعذّر إيجاد اسم مستخدم متاح');
 }
 
 async function enterApp() {
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return showAuth('vLogin');
-  me = user;
-  let { data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
-  if (!data) {
-    const uname = ((user.user_metadata && user.user_metadata.username) || user.email.split('@')[0]).toLowerCase();
-    try { await ensureProfile(uname); }
-    catch (x) { toast('تعذّر إنشاء الملف الشخصي: ' + x.message, 'error', 5000); return showAuth('vLogin'); }
-    ({ data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle());
+  if (entering) return;
+  entering = true;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return showAuth('vLogin');
+    me = user;
+    let { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if (error) throw error;
+    if (!data) {
+      const meta = user.user_metadata && user.user_metadata.username;
+      const uname = cleanUser(meta || (user.email || '').split('@')[0] || 'user').replace(/[^a-z0-9_]/g, '').slice(0, 20).padEnd(3, '0');
+      await ensureProfile(uname);
+      ({ data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle());
+      if (error) throw error;
+    }
+    profile = data || {};
+    $('boot').hidden = true;
+    $('auth').hidden = true;
+    $('app').hidden = false;
+    window.onbeforeunload = null;
+    await paintProfile();
+  } catch (x) {
+    console.error('[enterApp]', x);
+    toast(authMsg(x), 'error', 5000);
+    showAuth('vLogin');
+  } finally {
+    entering = false;
   }
-  profile = data || {};
-  $('auth').hidden = true;
-  $('app').hidden = false;
-  await paintProfile();
 }
 
 async function paintProfile() {
@@ -385,13 +553,16 @@ async function paintProfile() {
   $('pBio').value = p.bio || '';
   $('pCity').value = p.city || '';
   $('pBirth').value = p.birth || '';
+  $('pBirth').max = new Date().toISOString().slice(0, 10);
   $('pLink').value = p.link || '';
   $('pPass').value = '';
   $('pEmail').value = '';
   $('pPhone').value = '';
-  const { data } = await sb.from('profile_private').select('email, phone').eq('id', me.id).maybeSingle();
-  $('pEmail').value = (data && data.email) || '';
-  $('pPhone').value = (data && data.phone) || '';
+  try {
+    const { data } = await sb.from('profile_private').select('email, phone').eq('id', me.id).maybeSingle();
+    $('pEmail').value = (data && data.email) || '';
+    $('pPhone').value = (data && data.phone) || '';
+  } catch (x) { console.error('[profile_private]', x); }
 }
 
 $('pForm').onsubmit = async (e) => {
@@ -400,32 +571,45 @@ $('pForm').onsubmit = async (e) => {
   const name = $('pName').value.trim();
   const bio = $('pBio').value.trim();
   const city = $('pCity').value.trim();
-  const link = $('pLink').value.trim();
+  let link = $('pLink').value.trim();
   const birth = $('pBirth').value || null;
-  const email = $('pEmail').value.trim() || null;
+  const email = $('pEmail').value.trim().toLowerCase() || null;
   const phone = normPhone($('pPhone').value) || null;
   const newPw = $('pPass').value;
 
+  if (!name) return setErr('pErr', 'الاسم مطلوب');
   if (name.length > 40) return setErr('pErr', 'الاسم 40 حرفاً كحد أقصى');
+  if (birth && (birth < '1900-01-01' || birth > new Date().toISOString().slice(0, 10))) return setErr('pErr', 'تاريخ الميلاد غير صحيح');
+  if (link) {
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(link)) link = 'https://' + link;
+    try { const u = new URL(link); if (!/^https?:$/.test(u.protocol)) throw 0; link = u.href; }
+    catch { return setErr('pErr', 'الرابط غير صحيح (يجب أن يبدأ بـ https://)'); }
+  }
+  if (email && !EMAIL_RE.test(email)) return setErr('pErr', 'بريد الاتصال غير صحيح');
+  if (phone && !/^\+?\d{6,15}$/.test(phone)) return setErr('pErr', 'رقم الهاتف غير صحيح');
   if (newPw && newPw.length < 8) return setErr('pErr', 'كلمة المرور 8 أحرف على الأقل');
 
   busy($('pBtn'), true, 'جارٍ الحفظ');
+  try {
+    const { error: e1 } = await sb.from('profiles').update({ name, bio, city, link: link || '', birth }).eq('id', me.id);
+    if (e1) return setErr('pErr', 'تعذّر حفظ الملف: ' + e1.message);
 
-  const { error: e1 } = await sb.from('profiles').update({ name, bio, city, link, birth }).eq('id', me.id);
-  if (e1) { busy($('pBtn'), false, 'حفظ التغييرات'); return setErr('pErr', 'تعذّر حفظ الملف: ' + e1.message); }
+    const { error: e2 } = await sb.from('profile_private').upsert({ id: me.id, email, phone }, { onConflict: 'id' });
+    if (e2) return setErr('pErr', 'تعذّر حفظ بيانات الاتصال: ' + e2.message);
 
-  const { error: e2 } = await sb.from('profile_private').upsert({ id: me.id, email, phone }, { onConflict: 'id' });
-  if (e2) { busy($('pBtn'), false, 'حفظ التغييرات'); return setErr('pErr', 'تعذّر حفظ بيانات الاتصال: ' + e2.message); }
-
-  if (newPw) {
-    const { error: e3 } = await sb.auth.updateUser({ password: newPw });
-    if (e3) { busy($('pBtn'), false, 'حفظ التغييرات'); return setErr('pErr', 'تعذّر تغيير كلمة المرور: ' + e3.message); }
+    if (newPw) {
+      const { error: e3 } = await sb.auth.updateUser({ password: newPw });
+      if (e3) return setErr('pErr', 'تعذّر تغيير كلمة المرور: ' + authMsg(e3));
+    }
+    profile = { ...profile, name, bio, city, link, birth };
+    await paintProfile();
+    toast('تم الحفظ', 'success');
+  } catch (x) {
+    console.error('[save]', x);
+    setErr('pErr', authMsg(x));
+  } finally {
+    busy($('pBtn'), false, 'حفظ التغييرات');
   }
-
-  busy($('pBtn'), false, 'حفظ التغييرات');
-  profile = { ...profile, name, bio, city, link, birth };
-  await paintProfile();
-  toast('تم الحفظ', 'success');
 };
 
 $('pFile').onchange = (e) => {
@@ -433,9 +617,12 @@ $('pFile').onchange = (e) => {
   e.target.value = '';
   if (!f) return;
   if (!f.type.startsWith('image/')) return toast('اختر ملف صورة', 'error');
+  if (f.size > 20 * 1024 * 1024) return toast('الصورة كبيرة جداً (الحد 20 ميغابايت)', 'error');
   const fr = new FileReader();
+  fr.onerror = () => toast('تعذّرت قراءة الصورة', 'error');
   fr.onload = () => {
     const im = new Image();
+    im.onerror = () => toast('ملف الصورة غير مدعوم أو تالف', 'error');
     im.onload = async () => {
       try {
         const side = Math.min(im.width, im.height);
@@ -443,6 +630,7 @@ $('pFile').onchange = (e) => {
         c.width = c.height = 320;
         c.getContext('2d').drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, 320, 320);
         const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85));
+        if (!blob) throw new Error('canvas');
         const path = `${me.id}/${crypto.randomUUID()}.jpg`;
         const { error } = await sb.storage.from('media').upload(path, blob, { upsert: false, contentType: 'image/jpeg' });
         if (error) return toast('تعذّر رفع الصورة: ' + error.message, 'error', 5000);
@@ -453,6 +641,7 @@ $('pFile').onchange = (e) => {
         setAvatar(url, profile.name || profile.username);
         toast('تم تحديث الصورة', 'success');
       } catch (x) {
+        console.error('[avatar]', x);
         toast('تعذّر رفع الصورة', 'error');
       }
     };
@@ -461,19 +650,61 @@ $('pFile').onchange = (e) => {
   fr.readAsDataURL(f);
 };
 
+function resetAfterLogout() {
+  me = null; profile = {}; pending = null;
+  ['lId', 'lPass', 'iUser', 'rUser', 'rEmail', 'rPass', 'vCode', 'pPass'].forEach((i) => { $(i).value = ''; });
+  showAuth('vLogin');
+}
 $('logoutBtn').onclick = async () => {
   if (!confirm('هل تريد تسجيل الخروج؟')) return;
-  await sb.auth.signOut();
-  me = null; profile = {};
-  showAuth('vLogin');
+  try { await sb.auth.signOut(); } catch (x) { console.error('[signOut]', x); }
+  resetAfterLogout();
 };
 
-/* ---------- boot ---------- */
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) await enterApp();
-  else showAuth('vLogin');
-})();
+/* ================= الإقلاع ================= */
+async function loadLib() {
+  let last;
+  for (const u of LIB_URLS) {
+    try { return await import(u); } catch (x) { last = x; console.warn('[lib] failed', u, x); }
+  }
+  throw last || new Error('lib');
+}
+
+function bootFail(msg) {
+  $('bootSpin').hidden = true;
+  $('bootMsg').textContent = msg;
+  $('bootMsg').className = 'err';
+  $('bootRetry').hidden = false;
+  $('boot').hidden = false;
+}
+$('bootRetry').onclick = () => location.reload();
+
+async function boot() {
+  try {
+    const { createClient } = await loadLib();
+    sb = createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+  } catch (x) {
+    console.error('[boot]', x);
+    return bootFail('تعذّر تحميل التطبيق. تحقق من الإنترنت ثم أعد المحاولة.');
+  }
+  // تسجيل الخروج من تبويب آخر أو انتهاء الجلسة
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT' && me) { setTimeout(resetAfterLogout, 0); toast('انتهت الجلسة، سجّل الدخول من جديد', '', 4000); }
+  });
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) await enterApp();
+    else showAuth('vLogin');
+  } catch (x) {
+    console.error('[boot session]', x);
+    showAuth('vLogin');
+  }
+}
+boot();
+
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
 </script>
 </body>
 </html>
